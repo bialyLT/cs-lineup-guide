@@ -1,0 +1,12 @@
+
+> project-cs2-guide-lineups@0.1.0 start
+> next start
+
+▲ Next.js 16.3.0
+- Local:         http://localhost:3000
+- Network:       http://26.245.44.86:3000
+✓ Ready in 556ms
+⚠ Warning: Next.js ignored package-lock.json in C:\Users\Usuario because it is outside the current Git repository (C:\Users\Usuario\Documents\visual).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 97ms
