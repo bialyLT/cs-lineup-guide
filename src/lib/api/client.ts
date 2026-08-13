@@ -1,9 +1,12 @@
 /**
  * Cliente HTTP minimalista para consumir Django REST Framework.
  *
- * Base URL proveniente de NEXT_PUBLIC_API_URL. Las peticiones reales aún no
- * existen: esta capa queda preparada para cuando el backend esté disponible.
+ * Inyecta el access token de localStorage y renueva automáticamente el token
+ * ante el primer 401 (refresh una vez y reintenta la misma petición).
  */
+
+import { refreshTokens } from "@/lib/auth/refresh";
+import { tokenStore } from "@/lib/auth/token-store";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
@@ -30,23 +33,71 @@ function buildUrl(path: string, query?: Query) {
   return url.toString();
 }
 
+async function errorMessage(res: Response, fallback: string): Promise<string> {
+  const raw = await res.text().catch(() => undefined);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (typeof parsed === "string" && parsed) return parsed;
+      if (parsed && typeof parsed === "object") {
+        const value = (parsed as Record<string, unknown>).detail;
+        if (typeof value === "string" && value) return value;
+        if (Array.isArray(value) && typeof value[0] === "string" && value[0]) {
+          return value[0];
+        }
+      }
+    } catch {
+      return raw.trim() || fallback;
+    }
+  }
+  return fallback;
+}
+
+function headersFor(init: RequestInit): Record<string, string> {
+  const extra: Record<string, string> = {};
+  if (init.headers instanceof Headers) {
+    init.headers.forEach((value, key) => {
+      extra[key] = value;
+    });
+  } else if (Array.isArray(init.headers)) {
+    for (const [key, value] of init.headers) extra[key] = value;
+  } else if (init.headers) {
+    Object.assign(extra, init.headers);
+  }
+
+  const token = tokenStore.getAccess();
+  return {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+async function doFetch(path: string, init: RequestInit, query?: Query) {
+  const headers = headersFor(init);
+  return fetch(buildUrl(path, query), { ...init, headers });
+}
+
 async function request<T>(
   path: string,
   init: RequestInit = {},
   query?: Query,
 ): Promise<T> {
-  const res = await fetch(buildUrl(path, query), {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...init.headers,
-    },
-  });
+  const hadToken = Boolean(tokenStore.getAccess());
+  let res: Response;
+  try {
+    res = await doFetch(path, init, query);
+  } catch (error) {
+    throw new ApiError(0, error instanceof Error ? error.message : "Error de red");
+  }
+
+  if (res.status === 401 && hadToken && (await refreshTokens())) {
+    res = await doFetch(path, init, query);
+  }
 
   if (!res.ok) {
-    const detail = await res.text().catch(() => undefined);
-    throw new ApiError(res.status, detail || res.statusText);
+    throw new ApiError(res.status, await errorMessage(res, res.statusText));
   }
 
   if (res.status === 204) return undefined as T;

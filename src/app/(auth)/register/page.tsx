@@ -1,4 +1,7 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,10 +13,32 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-export const metadata: Metadata = { title: "Crear cuenta" };
+import { useAuth } from "@/lib/auth/auth-context";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { register } = useAuth();
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      await register({ username, email, password });
+      router.replace("/home");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo crear la cuenta.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -23,7 +48,7 @@ export default function RegisterPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="username">Nombre de usuario</Label>
             <Input
@@ -31,6 +56,9 @@ export default function RegisterPage() {
               type="text"
               placeholder="LineupHunter"
               autoComplete="username"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -40,6 +68,9 @@ export default function RegisterPage() {
               type="email"
               placeholder="vos@ejemplo.com"
               autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -49,10 +80,21 @@ export default function RegisterPage() {
               type="password"
               placeholder="Mínimo 8 caracteres"
               autoComplete="new-password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <Button type="submit" className="mt-1 w-full">
-            Crear cuenta
+
+          {error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : null}
+
+          <Button type="submit" className="mt-1 w-full" disabled={submitting}>
+            {submitting ? "Creando…" : "Crear cuenta"}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">

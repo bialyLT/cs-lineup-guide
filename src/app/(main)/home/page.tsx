@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatPill } from "@/components/layout/stat-pill";
+import { useAuth } from "@/lib/auth/auth-context";
 import { mockMaps } from "@/features/mapas/mock";
 import { MapCard } from "@/features/mapas/components/map-card";
-import { mockProgression, mockUser } from "@/features/perfil/mock";
+import { mockProgression } from "@/features/perfil/mock";
 import { LevelProgressBar } from "@/features/perfil/components/level-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 
@@ -26,7 +27,9 @@ const item = {
 };
 
 export default function HomePage() {
+  const { user } = useAuth();
   const level = getLevelProgress(mockProgression.xp).level;
+  const name = user?.displayName ?? user?.username ?? "invitado";
 
   return (
     <motion.div
@@ -37,7 +40,7 @@ export default function HomePage() {
     >
       <motion.div variants={item} className="flex flex-col gap-3">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Buenas, {mockUser.displayName ?? mockUser.username}
+          Buenas, {name}
         </h1>
         <p className="text-sm text-muted-foreground">
           Seguro hay un lineup nuevo esperándote.
