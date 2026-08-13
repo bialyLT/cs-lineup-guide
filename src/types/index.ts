@@ -95,6 +95,7 @@ export interface Progression {
   xp: number;
   streak: number;
   coins: number;
+  bestStreak?: number;
 }
 
 /** Estados de desbloqueo de contenido. */

@@ -1,27 +1,89 @@
-import type { Quiz, Question, ID } from "@/types";
+import type { ID, Option, Question, Quiz } from "@/types";
 import { apiClient } from "./client";
 
-/**
- * Servicios para inicio y respuesta de quizzes.
- * Endpoints provisionales; se ajustarán a los serializers de Django.
- */
+export interface ApiOption {
+  id: number;
+  text?: string | null;
+  position?: { x: number; y: number } | null;
+}
+
+export interface ApiQuestion {
+  id: number;
+  map: string;
+  lineup_id?: number | null;
+  type: string;
+  prompt: string;
+  helper_text?: string | null;
+  image_url?: string | null;
+  options: ApiOption[];
+}
+
+export interface ApiQuiz {
+  id: number;
+  title: string;
+  map_ids: string[];
+  questions: ApiQuestion[];
+}
+
+function mapApiOption(raw: ApiOption): Option {
+  return {
+    id: String(raw.id),
+    text: raw.text ?? undefined,
+    position: raw.position ? { x: raw.position.x, y: raw.position.y } : undefined,
+  };
+}
+
+export function mapApiQuestion(raw: ApiQuestion): Question {
+  return {
+    id: String(raw.id),
+    type: raw.type as Question["type"],
+    prompt: raw.prompt,
+    helperText: raw.helper_text ?? undefined,
+    imageUrl: raw.image_url ?? undefined,
+    options: raw.options.map(mapApiOption),
+  };
+}
+
+export function mapApiQuiz(raw: ApiQuiz): Quiz {
+  return {
+    id: String(raw.id),
+    title: raw.title,
+    mapIds: raw.map_ids,
+    questions: raw.questions.map(mapApiQuestion),
+  };
+}
+
+export interface AnswerResponse {
+  correct: boolean;
+  xp: number;
+  coins: number;
+  streak: number;
+  bestStreak: number;
+}
+
+/** Creación y respuesta de quizzes contra el backend. */
 export const quizService = {
-  /** Lista de quizzes disponibles (quiz personalizado / todos los mapas). */
-  list: () => apiClient.get<Quiz[]>("/quizzes/"),
+  /** Genera un quiz a partir de un set de slugs de mapas. */
+  create: (mapIds: ID[]): Promise<Quiz> =>
+    apiClient
+      .post<ApiQuiz>("/quizzes/generate/", { map_ids: mapIds })
+      .then(mapApiQuiz),
 
-  /** Detalle de un quiz existente. */
-  detail: (id: ID) => apiClient.get<Quiz>(`/quizzes/${id}/`),
-
-  /** Pregunta de ejemplo de un quiz (para construcción de pantallas). */
-  question: (quizId: ID, questionId: ID) =>
-    apiClient.get<Question>(`/quizzes/${quizId}/questions/${questionId}/`),
-
-  /** Crea un quiz personalizado a partir de un set de mapas. */
-  create: (mapIds: ID[]) => apiClient.post<Quiz>("/quizzes/", { map_ids: mapIds }),
-
-  /** Envía una respuesta y obtiene feedback (aún no implementado en el backend). */
-  submitAnswer: (questionId: ID, optionId: ID) =>
-    apiClient.post<{ correct: boolean }>(`/questions/${questionId}/answer/`, {
-      option_id: optionId,
-    }),
+  /** Envía la respuesta y actualiza contadores en el servidor. */
+  submitAnswer: (questionId: ID, optionId: ID): Promise<AnswerResponse> =>
+    apiClient
+      .post<{
+        correct: boolean;
+        xp: number;
+        coins: number;
+        streak: number;
+        best_streak: number;
+      }>(`/questions/${questionId}/answer/`, { option_id: Number(optionId) })
+      .then((raw) => ({
+        correct: raw.correct,
+        xp: raw.xp,
+        coins: raw.coins,
+        streak: raw.streak,
+        bestStreak: raw.best_streak,
+      })),
 };

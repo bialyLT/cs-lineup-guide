@@ -15,7 +15,7 @@ interface RankingItemProps {
 }
 
 export function RankingItem({ entry, isCurrentUser, className }: RankingItemProps) {
-  const initials = (entry.displayName ?? entry.username).slice(0, 2).toUpperCase();
+  const initials = (entry.displayName || entry.username).slice(0, 2).toUpperCase();
 
   return (
     <div
@@ -38,7 +38,7 @@ export function RankingItem({ entry, isCurrentUser, className }: RankingItemProp
       </Avatar>
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-semibold">
-          {entry.displayName ?? entry.username}
+          {entry.displayName || entry.username}
           {isCurrentUser ? (
             <span className="ml-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
               vos

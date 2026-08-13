@@ -6,3 +6,46 @@
 [browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
 [browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
 [browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
+[Server HMR] Update failed, full reload needed: SyntaxError: Identifier 'answer' has already been declared
+    at eval (<anonymous>)
+[browser] ./src/app/(main)/quiz/page.tsx:70:9
+Error: the name `answer` is defined multiple times
+  68 |   const earnedCoins = correctCount * 2;
+  69 |
+> 70 |   const answer = useMutation({
+     |         ^^^^^^
+  71 |     mutationFn: () => quizService.submitAnswer(question.id, selectedId ?? ""),
+  72 |     onSuccess: (resp) => {
+  73 |       setResult(resp);
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:70:9
+Error: the name `answer` is defined multiple times
+  68 |   const earnedCoins = correctCount * 2;
+  69 |
+> 70 |   const answer = useMutation({
+     |         ^^^^^^
+  71 |     mutationFn: () => quizService.submitAnswer(question.id, selectedId ?? ""),
+  72 |     onSuccess: (resp) => {
+  73 |       setResult(resp);
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)

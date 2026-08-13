@@ -2,7 +2,7 @@
 from django.db import transaction
 
 from apps.maps.models import Map
-from apps.progression.services import available_questions
+from apps.progression.services import available_questions, ensure_starter_place
 
 from .models import Quiz, QuizQuestion
 
@@ -13,6 +13,8 @@ class QuizGenerationError(Exception):
 
 @transaction.atomic
 def generate_quiz(user, maps: "models.QuerySet[Map]", title: str = "") -> Quiz:
+    # Primera vez: desbloquear un lugar de arranque para poder jugar.
+    ensure_starter_place(user)
     questions = list(
         available_questions(user, maps).order_by(
             "lineup__place__order", "lineup__order", "id"

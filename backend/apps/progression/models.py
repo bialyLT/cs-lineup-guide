@@ -46,6 +46,7 @@ class UserPlaceUnlock(models.Model):
 
     class Via(models.TextChoices):
         FREE = "free", "Gratuito (único)"
+        STARTER = "starter", "Inicial"
         COINS = "coins", "Monedas"
 
     user = models.ForeignKey(

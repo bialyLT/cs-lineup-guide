@@ -10,28 +10,15 @@ import {
 } from "react";
 
 import { apiClient } from "@/lib/api/client";
+import { mapApiUser, type ApiUser } from "@/lib/api/mappers";
 import type { User } from "@/types";
 
 import { tokenStore } from "./token-store";
-
-interface ApiUser {
-  id: number | string;
-  username: string;
-  display_name?: string;
-}
 
 interface AuthResponse {
   user: ApiUser;
   refresh: string;
   access: string;
-}
-
-function mapUser(raw: ApiUser): User {
-  return {
-    id: String(raw.id),
-    username: raw.username,
-    displayName: raw.display_name,
-  };
 }
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
@@ -66,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const data = await apiClient.get<{ user: ApiUser }>("/me/");
         if (cancelled) return;
-        setUser(mapUser(data.user));
+        setUser(mapApiUser(data.user));
         setStatus("authenticated");
       } catch {
         tokenStore.clear();
@@ -83,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const storeSession = useCallback((data: AuthResponse) => {
     tokenStore.setTokens(data.access, data.refresh);
-    setUser(mapUser(data.user));
+    setUser(mapApiUser(data.user));
     setStatus("authenticated");
   }, []);
 

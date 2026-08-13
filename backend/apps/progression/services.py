@@ -61,9 +61,36 @@ def get_or_create_progression(user) -> Progression:
     return progression
 
 
+def ensure_starter_place(user) -> Place | None:
+    """Garantiza que el usuario tenga al menos un lugar desbloqueado para
+    poder generar su primer quiz (el primer lugar del primer mapa gratis).
+
+    Se evita si el usuario ya desbloqueó algún lugar por su cuenta
+    (gratuito elegido o pagado con monedas).
+    """
+    if get_unlocked_place_ids(user):
+        return None
+    starter = (
+        Place.objects.filter(map__is_free=True)
+        .order_by("map__order", "order")
+        .select_related("map")
+        .first()
+    )
+    if starter is None:
+        return None
+    UserPlaceUnlock.objects.get_or_create(
+        user=user,
+        place=starter,
+        defaults={"via": UserPlaceUnlock.Via.STARTER},
+    )
+    return starter
+
+
 def create_initial_progression(user) -> Progression:
     """Progressión inicial al registrarse. Los tipos gratis se derivan, no se guardan."""
-    return get_or_create_progression(user)
+    progression = get_or_create_progression(user)
+    ensure_starter_place(user)
+    return progression
 
 
 # ----- Desbloqueos (pago con monedas o lugar gratuito) --------------------

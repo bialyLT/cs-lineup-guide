@@ -1,18 +1,50 @@
-import type { Metadata } from "next";
-import { CheckCircle2, Flame, Gamepad2, Coins, Target, Trophy } from "lucide-react";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import {
+  CheckCircle2,
+  Coins,
+  Flame,
+  MapPin,
+  Trophy,
+  Zap,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/page-header";
-import { mockProgression, mockUser } from "@/features/perfil/mock";
+import { rankingService } from "@/lib/api/ranking.service";
+import { userService } from "@/lib/api/user.service";
+import { useAuth } from "@/lib/auth/auth-context";
 import { LevelProgressBar } from "@/features/perfil/components/level-progress-bar";
 import { StatCard } from "@/features/perfil/components/stat-card";
 
-export const metadata: Metadata = { title: "Perfil" };
-
 export default function PerfilPage() {
-  const initials = (mockUser.displayName ?? mockUser.username).slice(0, 2).toUpperCase();
+  const { user } = useAuth();
+  const { data: me, isLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: userService.me,
+    staleTime: 0,
+  });
+  const { data: ranking } = useQuery({
+    queryKey: ["ranking"],
+    queryFn: rankingService.global,
+    staleTime: 60_000,
+  });
+
+  if (isLoading || !me) {
+    return (
+      <PageHeader eyebrow="Perfil" title="Tu progreso" />
+    );
+  }
+
+  const progression = me.progression;
+  const initials = (user?.displayName || user?.username || "")
+    .slice(0, 2)
+    .toUpperCase();
+  const unlockedPlaces = me.unlocked.places.length;
+  const top = ranking?.you.rank;
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,7 +56,7 @@ export default function PerfilPage() {
         </Avatar>
         <div className="flex flex-col gap-1.5">
           <span className="text-lg font-semibold tracking-tight">
-            {mockUser.displayName ?? mockUser.username}
+            {user?.displayName || user?.username}
           </span>
           <Badge variant="secondary" className="w-fit">
             Jugador activo
@@ -32,34 +64,62 @@ export default function PerfilPage() {
         </div>
       </section>
 
-      <LevelProgressBar xp={mockProgression.xp} />
+      <LevelProgressBar xp={progression.xp} />
 
       <section className="grid grid-cols-2 gap-3">
         <StatCard
           icon={<Flame className="text-warning" />}
           label="Racha"
-          value={mockProgression.streak}
+          value={progression.streak}
           tone="warning"
         />
         <StatCard
           icon={<Coins className="text-warning" />}
           label="Monedas"
-          value={mockProgression.coins}
+          value={progression.coins}
           tone="warning"
         />
-        <StatCard icon={<CheckCircle2 />} label="Lineups estudiados" value={64} tone="success" />
-        <StatCard icon={<Target />} label="Precisión" value="78%" tone="success" />
-        <StatCard icon={<Gamepad2 />} label="Quizzes jugados" value={31} />
-        <StatCard icon={<Trophy />} label="Top global" value="#12" />
+        <StatCard
+          icon={<Trophy className="text-warning" />}
+          label="Mejor racha"
+          value={progression.bestStreak ?? 0}
+          tone="warning"
+        />
+        <StatCard icon={<Zap />} label="Experiencia" value={progression.xp} />
+        <StatCard
+          icon={<CheckCircle2 />}
+          label="Lugares desbloqueados"
+          value={unlockedPlaces}
+          tone="success"
+        />
+        <StatCard
+          icon={<Trophy />}
+          label="Top global"
+          value={top ? `#${top}` : "#0"}
+          tone="success"
+        />
       </section>
 
       <Separator />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-foreground">Próximos pasos</h2>
-        <p className="text-sm text-muted-foreground">
-          Te faltan 30 monedas para desbloquear Inferno. Seguí tu racha para ganarlas más rápido.
-        </p>
+        <div className="flex items-start gap-2.5">
+          <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {me.unlocked.freePlaceUsed ? (
+              <>
+                Seguí respondiendo quizzes para ganar monedas y desbloquear
+                nuevos lugares, tipos de pregunta y mapas.
+              </>
+            ) : (
+              <>
+                Elegí tu lugar gratuito en un mapa disponible para empezar a
+                practicar sus lineups.
+              </>
+            )}
+          </p>
+        </div>
       </section>
     </div>
   );

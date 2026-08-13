@@ -1,16 +1,30 @@
-import type { Map, Place, Lineup, ID } from "@/types";
+import type { Map } from "@/types";
 import { apiClient } from "./client";
 
-/** Servicios de consulta de mapas, lugares y lineups. */
+export interface ApiMap {
+  id: string;
+  name: string;
+  image_url?: string | null;
+  is_free: boolean;
+  unlocked: boolean;
+  places?: unknown[];
+}
+
+function mapApiMap(raw: ApiMap): Map {
+  return {
+    id: raw.id,
+    name: raw.name,
+    imageUrl: raw.image_url ?? undefined,
+    isFree: raw.is_free,
+    unlocked: raw.unlocked,
+  };
+}
+
+/** Servicios de consulta de mapas. */
 export const mapService = {
   /** Todos los mapas con su estado de desbloqueo. */
-  list: () => apiClient.get<Map[]>("/maps/"),
-
-  detail: (id: ID) => apiClient.get<Map>(`/maps/${id}/`),
-
-  /** Lugares destacados de un mapa. */
-  places: (mapId: ID) => apiClient.get<Place[]>(`/maps/${mapId}/places/`),
-
-  /** Lineups disponibles sobre un mapa. */
-  lineups: (mapId: ID) => apiClient.get<Lineup[]>(`/maps/${mapId}/lineups/`),
+  list: async (): Promise<Map[]> => {
+    const raw = await apiClient.get<ApiMap[]>("/maps/");
+    return raw.map(mapApiMap);
+  },
 };

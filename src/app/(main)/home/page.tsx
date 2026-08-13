@@ -3,16 +3,14 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight, Coins, Crosshair, Flame, Lock, MapPin, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatPill } from "@/components/layout/stat-pill";
+import { mapService } from "@/lib/api/map.service";
+import { userService } from "@/lib/api/user.service";
 import { useAuth } from "@/lib/auth/auth-context";
-import { mockMaps } from "@/features/mapas/mock";
 import { MapCard } from "@/features/mapas/components/map-card";
-import { mockProgression } from "@/features/perfil/mock";
 import { LevelProgressBar } from "@/features/perfil/components/level-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 
@@ -28,8 +26,22 @@ const item = {
 
 export default function HomePage() {
   const { user } = useAuth();
-  const level = getLevelProgress(mockProgression.xp).level;
-  const name = user?.displayName ?? user?.username ?? "invitado";
+  const { data: me, isLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: userService.me,
+    staleTime: 0,
+  });
+  const { data: maps = [] } = useQuery({
+    queryKey: ["maps"],
+    queryFn: mapService.list,
+  });
+
+  const progression = me?.progression;
+  const level = progression ? getLevelProgress(progression.xp).level : 1;
+  const name = user?.displayName || user?.username || me?.user.username || "invitado";
+
+  const lockedMaps = maps.filter((map) => !map.unlocked && !map.isFree);
+  const availableCount = maps.filter((map) => map.unlocked || map.isFree).length;
 
   return (
     <motion.div
@@ -47,31 +59,39 @@ export default function HomePage() {
         </p>
       </motion.div>
 
-      <motion.div variants={item} className="flex flex-wrap items-center gap-2">
-        <StatPill
-          icon={<Flame className="text-warning" />}
-          label="Racha de respuestas correctas"
-          value={mockProgression.streak}
-        />
-        <StatPill
-          icon={<Coins className="text-warning" />}
-          label="Monedas disponibles"
-          value={mockProgression.coins}
-        />
-        <StatPill
-          icon={<Zap />}
-          label="Nivel actual"
-          value={`Nv. ${level}`}
-        />
-      </motion.div>
+      {progression ? (
+        <>
+          <motion.div variants={item} className="flex flex-wrap items-center gap-2">
+            <StatPill
+              icon={<Flame className="text-warning" />}
+              label="Racha de respuestas correctas"
+              value={progression.streak}
+            />
+            <StatPill
+              icon={<Coins className="text-warning" />}
+              label="Monedas disponibles"
+              value={progression.coins}
+            />
+            <StatPill
+              icon={<Zap />}
+              label="Nivel actual"
+              value={`Nv. ${level}`}
+            />
+          </motion.div>
 
-      <motion.div variants={item}>
-        <LevelProgressBar xp={mockProgression.xp} />
-      </motion.div>
+          <motion.div variants={item}>
+            <LevelProgressBar xp={progression.xp} />
+          </motion.div>
+        </>
+      ) : (
+        <motion.div variants={item}>
+          <p className="text-sm text-muted-foreground">{isLoading ? "Cargando tu progreso…" : "Sin progreso aún."}</p>
+        </motion.div>
+      )}
 
       <motion.div variants={item}>
         <Link
-          href="/quiz"
+          href="/mapas"
           className="flex flex-col gap-3 rounded-xl bg-foreground p-5 text-background transition-transform active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
@@ -79,38 +99,19 @@ export default function HomePage() {
               <Crosshair className="size-5" />
             </span>
             <div className="flex flex-col">
-              <span className="text-base font-semibold">Comenzar un quiz</span>
+              <span className="text-base font-semibold">Crear un quiz</span>
               <span className="text-xs text-background/60">
-                Entrenamiento rápido · Mirage
+                Elegí mapas y practicá tus lineups
               </span>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-background/60">5 preguntas</span>
+            <span className="text-xs text-background/60">
+              {availableCount} {availableCount === 1 ? "mapa disponible" : "mapas disponibles"}
+            </span>
             <ArrowRight className="size-5" />
           </div>
         </Link>
-      </motion.div>
-
-      <motion.div variants={item}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Continuá donde quedaste</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Entrenamiento · Mirage</span>
-              <span className="tabular-nums text-muted-foreground">3 / 10</span>
-            </div>
-            <Progress value={30} className="h-1.5" />
-            <Link href="/quiz" className="mt-1 block">
-              <Button size="sm" className="w-full">
-                Continuar
-                <ArrowRight data-icon="inline-end" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
       </motion.div>
 
       <motion.div variants={item} className="flex flex-col gap-3">
@@ -124,24 +125,31 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {mockMaps.map((map) => (
-            <MapCard key={map.id} map={map} />
-          ))}
+          {maps.length === 0 ? (
+            <p className="col-span-2 text-sm text-muted-foreground">
+              {isLoading ? "Cargando mapas…" : "No hay mapas disponibles."}
+            </p>
+          ) : (
+            maps.map((map) => <MapCard key={map.id} map={map} />)
+          )}
         </div>
       </motion.div>
 
-      <motion.div variants={item}>
-        <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-4">
-          <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            <span className="font-medium text-foreground">
-              Inferno, Nuke, Ancient y más
-            </span>{" "}
-            se desbloquean con monedas. Ganá monedas manteniendo tu racha en los quizzes.
-          </p>
-          <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-        </div>
-      </motion.div>
+      {lockedMaps.length > 0 ? (
+        <motion.div variants={item}>
+          <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-4">
+            <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {lockedMaps.slice(0, 3).map((map) => map.name).join(", ")}
+                {lockedMaps.length > 3 ? " y más" : ""}
+              </span>{" "}
+              se desbloquean con monedas. Ganá monedas manteniendo tu racha en los quizzes.
+            </p>
+            <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+          </div>
+        </motion.div>
+      ) : null}
     </motion.div>
   );
 }
