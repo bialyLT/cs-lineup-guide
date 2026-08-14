@@ -33,6 +33,8 @@ export interface User {
   username: string;
   displayName?: string;
   email?: string;
+  /** true si el usuario es staff/superusuario (acceso al panel admin). */
+  isStaff?: boolean;
 }
 
 export interface Map {

@@ -6,6 +6,7 @@ import {
   Coins,
   Flame,
   MapPin,
+  ShieldCheck,
   Trophy,
   Zap,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import { userService } from "@/lib/api/user.service";
 import { useAuth } from "@/lib/auth/auth-context";
 import { LevelProgressBar } from "@/features/perfil/components/level-progress-bar";
 import { StatCard } from "@/features/perfil/components/stat-card";
+import Link from "next/link";
 
 export default function PerfilPage() {
   const { user } = useAuth();
@@ -99,6 +101,25 @@ export default function PerfilPage() {
           tone="success"
         />
       </section>
+
+      <Separator />
+
+      {user?.isStaff ? (
+        <Link
+          href="/admin"
+          className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/40 p-4 transition-colors hover:bg-muted/70"
+        >
+          <span className="flex size-10 items-center justify-center rounded-lg bg-foreground text-background">
+            <ShieldCheck className="size-5" />
+          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">Panel de administración</span>
+            <span className="text-xs text-muted-foreground">
+              Gestioná usuarios y contenido
+            </span>
+          </div>
+        </Link>
+      ) : null}
 
       <Separator />
 

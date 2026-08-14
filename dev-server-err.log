@@ -2,50 +2,42 @@
  To use this directory, set `turbopack.root` in your Next.js config.
 
 [browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
-[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
-[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
-[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
-[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
-[Server HMR] Update failed, full reload needed: SyntaxError: Identifier 'answer' has already been declared
-    at eval (<anonymous>)
-[browser] ./src/app/(main)/quiz/page.tsx:70:9
-Error: the name `answer` is defined multiple times
-  68 |   const earnedCoins = correctCount * 2;
-  69 |
-> 70 |   const answer = useMutation({
-     |         ^^^^^^
-  71 |     mutationFn: () => quizService.submitAnswer(question.id, selectedId ?? ""),
-  72 |     onSuccess: (resp) => {
-  73 |       setResult(resp);
-
-Ecmascript file had an error
-
-Import traces:
-  Client Component Browser:
-    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
-    ./src/app/(main)/quiz/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
-    ./src/app/(main)/quiz/page.tsx [Server Component] 
-[browser] ./src/app/(main)/quiz/page.tsx:70:9
-Error: the name `answer` is defined multiple times
-  68 |   const earnedCoins = correctCount * 2;
-  69 |
-> 70 |   const answer = useMutation({
-     |         ^^^^^^
-  71 |     mutationFn: () => quizService.submitAnswer(question.id, selectedId ?? ""),
-  72 |     onSuccess: (resp) => {
-  73 |       setResult(resp);
-
-Ecmascript file had an error
-
-Import traces:
-  Client Component Browser:
-    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
-    ./src/app/(main)/quiz/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
-    ./src/app/(main)/quiz/page.tsx [Server Component] 
-[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
+[browser] Uncaught ReferenceError: uploading is not defined
+    at eval (src/features/admin/admin-form.tsx:223:31)
+    at Array.map (<anonymous>)
+    at AdminForm (src/features/admin/admin-form.tsx:203:17)
+    at Set.forEach (<anonymous>)
+    at AdminResourceEditPage (src/app/(admin)/admin/[resource]/[id]/page.tsx:100:11)
+  221 |
+  222 |         if (field.type === "image") {
+> 223 |           const isUploading = uploading === field.name;
+      |                               ^
+  224 |           return (
+  225 |             <div key={field.name} className="flex flex-col gap-1.5">
+  226 |               <Label>{field.label}</Label>
+[browser] Uncaught ReferenceError: uploading is not defined
+    at <unknown> (src/features/admin/admin-form.tsx:223:31)
+    at Array.map (<anonymous>)
+    at AdminForm (src/features/admin/admin-form.tsx:203:17)
+    at AdminResourceEditPage (src/app/(admin)/admin/[resource]/[id]/page.tsx:100:11)
+  221 |
+  222 |         if (field.type === "image") {
+> 223 |           const isUploading = uploading === field.name;
+      |                               ^
+  224 |           return (
+  225 |             <div key={field.name} className="flex flex-col gap-1.5">
+  226 |               <Label>{field.label}</Label>
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: uploading is not defined
+    at <unknown> (src/features/admin/admin-form.tsx:230:31)
+    at Array.map (<anonymous>)
+    at AdminForm (src/features/admin/admin-form.tsx:210:17)
+    at AdminResourceEditPage (src/app/(admin)/admin/[resource]/[id]/page.tsx:100:11)
+  228 |
+  229 |         if (field.type === "image") {
+> 230 |           const isUploading = uploading === field.name;
+      |                               ^
+  231 |           return (
+  232 |             <div key={field.name} className="flex flex-col gap-1.5">
+  233 |               <Label>{field.label}</Label>
+⚠ Fast Refresh had to perform a full reload due to a runtime error.

@@ -84,6 +84,8 @@ INSTALLED_APPS = [
     "apps.maps",
     "apps.quiz",
     "apps.progression",
+    # Panel de administración (CRUD protegido por is_staff)
+    "apps.adminpanel",
 ]
 
 MIDDLEWARE = [
@@ -182,3 +184,18 @@ CORS_ALLOWED_ORIGINS = env_list(
         "http://127.0.0.1:3000",
     ],
 )
+
+# Cloudflare R2 (imágenes de mapas y quizzes) -----------------------------
+
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "")
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "")
+R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME", "cslineupsguide")
+R2_ENDPOINT_URL = os.environ.get(
+    "R2_ENDPOINT_URL",
+    "https://97c0b5f961934c102e3b4b8eb9277f0d.r2.cloudflarestorage.com",
+)
+# URL pública base (dominio r2.dev o custom) para servir las imágenes.
+R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL", "").rstrip("/")
+
+# Tamaño máximo de imagen subida al bucket (10 MB).
+R2_MAX_UPLOAD_BYTES = int(os.environ.get("R2_MAX_UPLOAD_BYTES", 10 * 1024 * 1024))

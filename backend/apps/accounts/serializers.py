@@ -6,7 +6,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "display_name"]
+        fields = ["id", "username", "display_name", "is_staff"]
         read_only_fields = fields
 
 

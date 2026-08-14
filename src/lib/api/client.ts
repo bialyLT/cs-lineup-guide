@@ -104,6 +104,32 @@ async function request<T>(
   return (await res.json()) as T;
 }
 
+/**
+ * Petición multipart (FormData). No se setea Content-Type manualmente:
+ * el navegador agrega el boundary correcto.
+ */
+async function requestForm<T>(path: string, formData: FormData): Promise<T> {
+  const token = tokenStore.getAccess();
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let res = await fetch(buildUrl(path), {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (res.status === 401 && token && (await refreshTokens())) {
+    headers.Authorization = `Bearer ${tokenStore.getAccess()}`;
+    res = await fetch(buildUrl(path), { method: "POST", headers, body: formData });
+  }
+
+  if (!res.ok) {
+    throw new ApiError(res.status, await errorMessage(res, res.statusText));
+  }
+  return (await res.json()) as T;
+}
+
 export const apiClient = {
   get<T>(path: string, query?: Query) {
     return request<T>(path, { method: "GET" }, query);
@@ -125,5 +151,10 @@ export const apiClient = {
 
   delete<T>(path: string) {
     return request<T>(path, { method: "DELETE" });
+  },
+
+  /** Sube un FormData con un archivo (multipart). */
+  uploadForm<T>(path: string, formData: FormData) {
+    return requestForm<T>(path, formData);
   },
 };

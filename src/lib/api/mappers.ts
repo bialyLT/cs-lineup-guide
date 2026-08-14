@@ -4,6 +4,7 @@ export interface ApiUser {
   id: number | string;
   username: string;
   display_name?: string;
+  is_staff?: boolean;
 }
 
 export interface ApiProgression {
@@ -18,6 +19,7 @@ export function mapApiUser(raw: ApiUser): User {
     id: String(raw.id),
     username: raw.username,
     displayName: raw.display_name,
+    isStaff: Boolean(raw.is_staff),
   };
 }
 

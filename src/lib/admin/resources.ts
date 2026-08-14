@@ -1,0 +1,383 @@
+/**
+ * Configuración declarativa del panel de administración.
+ *
+ * Cada entrada describe un recurso CRUD del backend (`/api/admin/<key>/`):
+ * qué columnas mostrar en la tabla y qué campos editar en el formulario.
+ * Es la única fuente de verdad para que las páginas genéricas funcionen.
+ */
+
+export type AdminFieldType =
+  | "text"
+  | "textarea"
+  | "url"
+  | "number"
+  | "boolean"
+  | "select"
+  | "relation"
+  | "datetime"
+  | "password"
+  | "image"
+  | "map-position"
+  | "options-editor";
+
+export interface AdminOptionsEditorConfig {
+  /** Recurso donde viven las opciones (ej. "options"). */
+  relatedResource: string;
+  /** Campo del recurso que apunta al registro actual (ej. "question"). */
+  relationField: string;
+  /** Campo de imagen del registro actual (ej. "image_url"). */
+  imageField: string;
+  /** Campos de salida x/y en el recurso relacionado. */
+  positionOutput: { x: string; y: string };
+}
+
+export interface AdminField {
+  name: string;
+  label: string;
+  type: AdminFieldType;
+  required?: boolean;
+  placeholder?: string;
+  helpText?: string;
+  /** Campo deshabilitado en el formulario (información de solo lectura). */
+  readOnly?: boolean;
+  /** No se muestra en el formulario (ej. id). */
+  hidden?: boolean;
+  /** Opciones para type: "select". */
+  options?: { value: string; label: string }[];
+  /** Recurso relacionado para type: "relation". */
+  resource?: string;
+  /** Campo legible del recurso relacionado para opciones y columnas. */
+  displayField?: string;
+  /** Relación múltiple (ManyToMany). */
+  multiple?: boolean;
+  step?: string;
+  min?: number;
+  max?: number;
+  /** Solo escritura: en edición se omite del payload si queda vacío. */
+  writeOnly?: boolean;
+  /** Permite null (ej. coordenadas opcionales). */
+  nullable?: boolean;
+  /** Carpeta destino en el bucket para type: "image". */
+  uploadTo?: string;
+  /** Para type: "map-position": la relación cuyo registro tiene la imagen del mapa
+   * (ej. { relationField: "map", imageField: "image_url" }). */
+  positionSource?: { relationField: string; imageField: string };
+  /** Para type: "map-position": campos de salida x/y del payload
+   * (ej. { x: "position_x", y: "position_y" }). */
+  positionOutput?: { x: string; y: string };
+  /** Para type: "options-editor": configuración del editor de opciones. */
+  optionsEditor?: AdminOptionsEditorConfig;
+}
+
+export interface AdminFilter {
+  /** Nombre del filtro y del query param (ej. "map"). */
+  name: string;
+  label: string;
+  /** De dónde salen las opciones del desplegable. */
+  options: "relation" | "select";
+  /** Para options: "relation": recurso del que se listan las opciones. */
+  resource?: string;
+  /** Para options: "relation": campo legible de las opciones. */
+  displayField?: string;
+  /** Para options: "select": lista fija de valores. */
+  optionsList?: { value: string; label: string }[];
+  /** Acota las opciones según otro filtro activo (ej. el lugar depende del mapa:
+   *  { filter: "map", map: "map" } fetchea los lugares con ?map=<mapa activo>). */
+  dependsOn?: { filter: string; map: string };
+}
+
+export interface AdminResourceConfig {
+  /** Segmento de URL y nombre del recurso en la API. */
+  key: string;
+  /** Etiqueta plural (ej. "Usuarios"). */
+  label: string;
+  /** Etiqueta singular (ej. "Usuario"). */
+  singular: string;
+  description?: string;
+  /** Columnas a mostrar en la tabla de listado. */
+  listColumns: string[];
+  fields: AdminField[];
+  /** true → sin crear/editar/eliminar (ej. audit-logs). */
+  readOnly?: boolean;
+  /** Filtros del listado vía query string (ej. lineups → map, place, util). */
+  filters?: AdminFilter[];
+  /** Acción por fila que enlaza a un recurso relacionado (ej. Lugares de un mapa). */
+  rowLink?: { label: string; href: (id: number | string) => string };
+}
+
+const UTILITY_TYPES = [
+  { value: "smoke", label: "Smoke" },
+  { value: "flashbang", label: "Flashbang" },
+  { value: "he", label: "HE" },
+  { value: "molotov", label: "Molotov" },
+  { value: "decoy", label: "Decoy" },
+];
+
+const QUESTION_TYPES = [
+  { value: "reference", label: "Adivinar la referencia" },
+  { value: "utility", label: "¿Qué utilidad lanzar?" },
+  { value: "landing_spot", label: "¿Dónde cae la utilidad?" },
+  { value: "key_combo", label: "Combinación de teclas" },
+  { value: "player_position", label: "Posición del jugador" },
+  { value: "map_location", label: "Lugares del mapa" },
+];
+
+const UNLOCK_VIA = [
+  { value: "free", label: "Gratuito (único)" },
+  { value: "starter", label: "Inicial" },
+  { value: "coins", label: "Monedas" },
+];
+
+const AUDIT_ACTIONS = [
+  { value: "create", label: "Crear" },
+  { value: "update", label: "Actualizar" },
+  { value: "delete", label: "Eliminar" },
+];
+
+export const adminResources: AdminResourceConfig[] = [
+  {
+    key: "users",
+    label: "Usuarios",
+    singular: "Usuario",
+    description: "Cuentas del sistema y sus permisos.",
+    listColumns: ["id", "username", "email", "display_name", "is_staff", "is_active"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "username", label: "Nombre de usuario", type: "text", required: true },
+      { name: "email", label: "Email", type: "text" },
+      { name: "display_name", label: "Nombre visible", type: "text" },
+      { name: "first_name", label: "Nombre", type: "text" },
+      { name: "last_name", label: "Apellido", type: "text" },
+      { name: "is_staff", label: "Staff (acceso al panel)", type: "boolean" },
+      { name: "is_superuser", label: "Superusuario", type: "boolean" },
+      { name: "is_active", label: "Activo", type: "boolean" },
+      {
+        name: "password",
+        label: "Contraseña",
+        type: "password",
+        writeOnly: true,
+        helpText: "Se guarda hasheada. Dejalo vacío para no cambiarla.",
+      },
+      { name: "date_joined", label: "Fecha de alta", type: "datetime", readOnly: true },
+      { name: "last_login", label: "Último acceso", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "maps",
+    label: "Mapas",
+    singular: "Mapa",
+    description: "Mapas del juego disponibles en los quizzes.",
+    listColumns: ["id", "name", "slug", "is_free", "order"],
+    rowLink: {
+      label: "Lugares",
+      href: (id) => `/admin/places?map=${id}`,
+    },
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "name", label: "Nombre", type: "text", required: true },
+      { name: "slug", label: "Slug", type: "text", required: true },
+      { name: "image_url", label: "Imagen", type: "image", uploadTo: "maps" },
+      { name: "is_free", label: "Gratis", type: "boolean" },
+      { name: "order", label: "Orden", type: "number" },
+    ],
+  },
+  {
+    key: "places",
+    label: "Lugares",
+    singular: "Lugar",
+    description: "Lugares dentro de cada mapa (A site, Apartamento…).",
+    listColumns: ["id", "map", "name", "order"],
+    filters: [
+      { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
+    ],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "map", label: "Mapa", type: "relation", resource: "maps", displayField: "name", required: true },
+      { name: "name", label: "Nombre", type: "text", required: true },
+      { name: "order", label: "Orden", type: "number" },
+      {
+        name: "position",
+        label: "Posición en el mapa",
+        type: "map-position",
+        positionSource: { relationField: "map", imageField: "image_url" },
+        positionOutput: { x: "position_x", y: "position_y" },
+      },
+    ],
+  },
+  {
+    key: "lineups",
+    label: "Lineups",
+    singular: "Lineup",
+    description: "Lineups concretos dentro de un lugar.",
+    listColumns: ["id", "place", "title", "util", "order"],
+    filters: [
+      { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
+      { name: "place", label: "Lugar", options: "relation", resource: "places", displayField: "name", dependsOn: { filter: "map", map: "map" } },
+      { name: "util", label: "Utilidad", options: "select", optionsList: UTILITY_TYPES },
+    ],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "place", label: "Lugar", type: "relation", resource: "places", displayField: "name", required: true },
+      { name: "title", label: "Título", type: "text", required: true },
+      { name: "util", label: "Utilidad", type: "select", options: UTILITY_TYPES, required: true },
+      { name: "description", label: "Descripción", type: "textarea" },
+      { name: "order", label: "Orden", type: "number" },
+    ],
+  },
+  {
+    key: "questions",
+    label: "Preguntas",
+    singular: "Pregunta",
+    description: "Preguntas sobre lineups para los quizzes.",
+    listColumns: ["id", "map", "lineup", "type", "prompt"],
+    filters: [
+      { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
+      { name: "lineup", label: "Lineup", options: "relation", resource: "lineups", displayField: "title", dependsOn: { filter: "map", map: "map" } },
+      { name: "type", label: "Tipo", options: "select", optionsList: QUESTION_TYPES },
+    ],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "map", label: "Mapa", type: "relation", resource: "maps", displayField: "name", required: true },
+      { name: "lineup", label: "Lineup", type: "relation", resource: "lineups", displayField: "title", required: true },
+      { name: "type", label: "Tipo", type: "select", options: QUESTION_TYPES, required: true },
+      { name: "prompt", label: "Enunciado", type: "textarea", required: true },
+      { name: "helper_text", label: "Ayuda", type: "textarea" },
+      { name: "image_url", label: "Imagen", type: "image", uploadTo: "questions" },
+      {
+        name: "options",
+        label: "Opciones de respuesta",
+        type: "options-editor",
+        optionsEditor: {
+          relatedResource: "options",
+          relationField: "question",
+          imageField: "image_url",
+          positionOutput: { x: "position_x", y: "position_y" },
+        },
+      },
+    ],
+  },
+  {
+    key: "options",
+    label: "Opciones",
+    singular: "Opción",
+    description: "Opciones de respuesta de cada pregunta.",
+    listColumns: ["id", "question", "text", "is_correct", "order"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "question", label: "Pregunta", type: "relation", resource: "questions", displayField: "prompt", required: true },
+      { name: "text", label: "Texto", type: "text" },
+      { name: "position_x", label: "Posición X (0-100)", type: "number", step: "0.01", nullable: true },
+      { name: "position_y", label: "Posición Y (0-100)", type: "number", step: "0.01", nullable: true },
+      { name: "is_correct", label: "Correcta", type: "boolean" },
+      { name: "order", label: "Orden", type: "number" },
+    ],
+  },
+  {
+    key: "quizzes",
+    label: "Quizzes",
+    singular: "Quiz",
+    description: "Quizzes generados por los usuarios.",
+    listColumns: ["id", "title", "user", "created_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
+      { name: "title", label: "Título", type: "text", required: true },
+      { name: "maps", label: "Mapas", type: "relation", resource: "maps", displayField: "name", multiple: true },
+      { name: "created_at", label: "Creado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "quiz-questions",
+    label: "Preguntas de quiz",
+    singular: "Pregunta de quiz",
+    description: "Snapshot de preguntas dentro de un quiz.",
+    listColumns: ["id", "quiz", "question", "order"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "quiz", label: "Quiz", type: "relation", resource: "quizzes", displayField: "title", required: true },
+      { name: "question", label: "Pregunta", type: "relation", resource: "questions", displayField: "prompt", required: true },
+      { name: "order", label: "Orden", type: "number" },
+    ],
+  },
+  {
+    key: "progressions",
+    label: "Progresiones",
+    singular: "Progresión",
+    description: "Contadores (XP, monedas, rachas) de cada usuario.",
+    listColumns: ["id", "user", "xp", "coins", "streak"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
+      { name: "xp", label: "Experiencia", type: "number", min: 0 },
+      { name: "coins", label: "Monedas", type: "number", min: 0 },
+      { name: "streak", label: "Racha", type: "number", min: 0 },
+      { name: "best_streak", label: "Mejor racha", type: "number", min: 0 },
+      { name: "last_streak_at", label: "Última racha", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "map-unlocks",
+    label: "Desbloqueos de mapa",
+    singular: "Desbloqueo de mapa",
+    listColumns: ["id", "user", "map", "unlocked_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
+      { name: "map", label: "Mapa", type: "relation", resource: "maps", displayField: "name", required: true },
+      { name: "unlocked_at", label: "Desbloqueado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "place-unlocks",
+    label: "Desbloqueos de lugar",
+    singular: "Desbloqueo de lugar",
+    listColumns: ["id", "user", "place", "via", "unlocked_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
+      { name: "place", label: "Lugar", type: "relation", resource: "places", displayField: "name", required: true },
+      { name: "via", label: "Vía", type: "select", options: UNLOCK_VIA },
+      { name: "unlocked_at", label: "Desbloqueado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "question-type-unlocks",
+    label: "Desbloqueos de tipo",
+    singular: "Desbloqueo de tipo",
+    description: "Desbloqueo de tipos de pregunta por usuario.",
+    listColumns: ["id", "user", "question_type", "unlocked_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
+      { name: "question_type", label: "Tipo de pregunta", type: "select", options: QUESTION_TYPES, required: true },
+      { name: "unlocked_at", label: "Desbloqueado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "audit-logs",
+    label: "Auditoría",
+    singular: "Registro de auditoría",
+    description: "Trail de operaciones del panel. Solo lectura.",
+    readOnly: true,
+    listColumns: ["id", "actor", "action", "model_name", "object_id", "created_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "actor", label: "Actor", type: "relation", resource: "users", displayField: "username", readOnly: true },
+      { name: "action", label: "Acción", type: "select", options: AUDIT_ACTIONS, readOnly: true },
+      { name: "app_label", label: "App", type: "text", readOnly: true },
+      { name: "model_name", label: "Modelo", type: "text", readOnly: true },
+      { name: "object_id", label: "Objeto", type: "text", readOnly: true },
+      { name: "summary", label: "Resumen", type: "text", readOnly: true },
+      { name: "ip_address", label: "IP", type: "text", readOnly: true },
+      { name: "created_at", label: "Fecha", type: "datetime", readOnly: true },
+    ],
+  },
+];
+
+export const adminResourceByKey = new Map(
+  adminResources.map((resource) => [resource.key, resource]),
+);
+
+export function getAdminResource(key: string): AdminResourceConfig | undefined {
+  return adminResourceByKey.get(key);
+}
