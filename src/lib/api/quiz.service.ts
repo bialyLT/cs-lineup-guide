@@ -11,6 +11,7 @@ export interface ApiQuestion {
   id: number;
   map: string;
   lineup_id?: number | null;
+  place_id?: number | null;
   type: string;
   prompt: string;
   helper_text?: string | null;
@@ -61,14 +62,42 @@ export interface AnswerResponse {
   bestStreak: number;
 }
 
+/** Filtros opcionales del quiz: acotan las preguntas disponibles. */
+export interface CreateQuizOptions {
+  /** Solo preguntas de estos lugares (ids numéricos). */
+  placeIds?: number[];
+  /** Un solo tipo de pregunta. */
+  questionType?: string;
+  /** Cantidad de preguntas (máximo: las disponibles para la selección). */
+  count?: number;
+}
+
+export interface QuizAvailabilityQuery {
+  maps: string[];
+  placeIds?: number[];
+  type?: string;
+}
+
 /** Creación y respuesta de quizzes contra el backend. */
 export const quizService = {
   /** Genera un quiz a partir de un set de slugs de mapas. */
-  create: (mapIds: ID[]): Promise<Quiz> =>
+  create: (mapIds: ID[], opts: CreateQuizOptions = {}): Promise<Quiz> =>
     apiClient
-      .post<ApiQuiz>("/quizzes/generate/", { map_ids: mapIds })
+      .post<ApiQuiz>("/quizzes/generate/", {
+        map_ids: mapIds,
+        ...(opts.placeIds?.length ? { place_ids: opts.placeIds } : {}),
+        ...(opts.questionType ? { question_type: opts.questionType } : {}),
+        ...(opts.count ? { count: opts.count } : {}),
+      })
       .then(mapApiQuiz),
 
+  /** Cuántas preguntas hay disponibles para una selección (máximo del quiz). */
+  available: (query: QuizAvailabilityQuery): Promise<{ available: number }> =>
+    apiClient.get<{ available: number }>("/quizzes/available/", {
+      maps: query.maps,
+      place_id: query.placeIds?.length ? query.placeIds : undefined,
+      type: query.type,
+    }),
   /** Envía la respuesta y actualiza contadores en el servidor. */
   submitAnswer: (questionId: ID, optionId: ID): Promise<AnswerResponse> =>
     apiClient

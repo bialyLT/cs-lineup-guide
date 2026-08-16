@@ -6,6 +6,7 @@ import { adminService } from "@/lib/api/admin.service";
 import type { AdminResourceConfig } from "@/lib/admin/resources";
 
 import type { LookupMap } from "./admin-value";
+import { relationLabel } from "./use-relation-options";
 
 /**
  * Carga las opciones de los filtros declarados en `resource.filters`.
@@ -35,7 +36,7 @@ export function useFilterOptions(
         options[filter.name] = new Map(
           records.map((record) => [
             String(record.id),
-            String(record[filter.displayField ?? "id"] ?? record.id),
+            relationLabel(record, filter.displayField ?? "id", filter.displayContext),
           ]),
         );
       }

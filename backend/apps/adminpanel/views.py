@@ -93,17 +93,20 @@ class LineupViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
 
 
 class QuestionViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
-    """Soporta `?map=<id>`, `?lineup=<id>` y `?type=<value>`."""
+    """Soporta `?map=<id>`, `?lineup=<id>`, `?place=<id>` y `?type=<value>`."""
     serializer_class = AdminQuestionSerializer
 
     def get_queryset(self):
-        queryset = Question.objects.select_related("map", "lineup").all()
+        queryset = Question.objects.select_related("map", "lineup", "place").all()
         map_id = self.request.query_params.get("map")
         if map_id:
             queryset = queryset.filter(map_id=map_id)
         lineup_id = self.request.query_params.get("lineup")
         if lineup_id:
             queryset = queryset.filter(lineup_id=lineup_id)
+        place_id = self.request.query_params.get("place")
+        if place_id:
+            queryset = queryset.filter(place_id=place_id)
         qtype = self.request.query_params.get("type")
         if qtype:
             queryset = queryset.filter(type=qtype)

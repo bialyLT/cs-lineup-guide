@@ -71,16 +71,20 @@ class AdminMapSerializer(serializers.ModelSerializer):
 
 
 class AdminPlaceSerializer(serializers.ModelSerializer):
+    map_name = serializers.CharField(source="map.name", read_only=True)
+
     class Meta:
         model = Place
-        fields = ["id", "map", "name", "order", "position_x", "position_y"]
+        fields = ["id", "map", "map_name", "name", "order", "position_x", "position_y"]
         read_only_fields = ["id"]
 
 
 class AdminLineupSerializer(serializers.ModelSerializer):
+    map_name = serializers.CharField(source="place.map.name", read_only=True)
+
     class Meta:
         model = Lineup
-        fields = ["id", "place", "title", "util", "description", "order"]
+        fields = ["id", "place", "map_name", "title", "util", "description", "order"]
         read_only_fields = ["id"]
 
 
@@ -91,6 +95,7 @@ class AdminQuestionSerializer(serializers.ModelSerializer):
             "id",
             "map",
             "lineup",
+            "place",
             "type",
             "prompt",
             "helper_text",

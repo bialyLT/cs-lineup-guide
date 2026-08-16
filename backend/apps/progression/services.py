@@ -6,7 +6,8 @@ La cascada es Mapa → Lugar → Lineup → Pregunta:
 """
 from datetime import timedelta
 
-from django.db import transaction
+from django.db import models, transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.maps.models import Map, Place
@@ -56,40 +57,68 @@ def free_place_used(user) -> bool:
     return UserPlaceUnlock.objects.filter(user=user, via=UserPlaceUnlock.Via.FREE).exists()
 
 
+def place_unlock_cost(place: Place) -> int:
+    """Costo de desbloquear un lugar: progresivo según su orden en el mapa."""
+    order = max(place.order, 1)
+    return constants.COIN_COST_PLACE_BASE + (order - 1) * constants.COIN_COST_PLACE_STEP
+
+
+def starter_places_selected(user) -> bool:
+    """True si el usuario ya eligió sus lugares iniciales (onboarding hecho)."""
+    return UserPlaceUnlock.objects.filter(
+        user=user, via=UserPlaceUnlock.Via.STARTER
+    ).exists()
+
+
 def get_or_create_progression(user) -> Progression:
     progression, _ = Progression.objects.get_or_create(user=user)
     return progression
 
 
-def ensure_starter_place(user) -> Place | None:
-    """Garantiza que el usuario tenga al menos un lugar desbloqueado para
-    poder generar su primer quiz (el primer lugar del primer mapa gratis).
-
-    Se evita si el usuario ya desbloqueó algún lugar por su cuenta
-    (gratuito elegido o pagado con monedas).
-    """
-    if get_unlocked_place_ids(user):
-        return None
-    starter = (
-        Place.objects.filter(map__is_free=True)
-        .order_by("map__order", "order")
-        .select_related("map")
-        .first()
-    )
-    if starter is None:
-        return None
-    UserPlaceUnlock.objects.get_or_create(
-        user=user,
-        place=starter,
-        defaults={"via": UserPlaceUnlock.Via.STARTER},
-    )
-    return starter
-
-
 def create_initial_progression(user) -> Progression:
-    """Progressión inicial al registrarse. Los tipos gratis se derivan, no se guardan."""
+    """Progresión inicial al registrarse. El onboarding de lugares es aparte."""
+    return get_or_create_progression(user)
+
+
+# ----- Onboarding: elección de los primeros lugares -----------------------
+
+
+@transaction.atomic
+def select_starter_places(user, place_ids) -> Progression:
+    """Desbloquea los primeros lugares del usuario (hasta STARTER_PLACE_COUNT).
+
+    Los lugares deben pertenecer a un mapa gratuito. Es una elección única:
+    el resto de lugares se desbloquea con monedas.
+    """
+    if starter_places_selected(user):
+        raise UnlockError(
+            "Ya elegiste tus lugares iniciales.", code="starter_already_selected"
+        )
+    if not isinstance(place_ids, (list, tuple)) or not place_ids:
+        raise UnlockError("Elegí al menos un lugar para empezar.", code="invalid_places")
+
+    try:
+        unique = list(dict.fromkeys(int(pk) for pk in place_ids))
+    except (TypeError, ValueError):
+        raise UnlockError("Lugares inválidos.", code="invalid_places")
+    if len(unique) > constants.STARTER_PLACE_COUNT:
+        raise UnlockError(
+            f"Podés elegir hasta {constants.STARTER_PLACE_COUNT} lugares.",
+            code="too_many_places",
+        )
+
+    places = list(Place.objects.filter(pk__in=unique, map__is_free=True))
+    if len(places) != len(unique):
+        raise UnlockError(
+            "Alguno de los lugares no está disponible para empezar.",
+            code="invalid_places",
+        )
+
     progression = get_or_create_progression(user)
-    ensure_starter_place(user)
+    UserPlaceUnlock.objects.bulk_create(
+        UserPlaceUnlock(user=user, place=place, via=UserPlaceUnlock.Via.STARTER)
+        for place in places
+    )
     return progression
 
 
@@ -117,21 +146,23 @@ def unlock_map(user, map_: Map) -> Progression:
 
 @transaction.atomic
 def unlock_place(user, place: Place, via: str = UserPlaceUnlock.Via.COINS) -> Progression:
+    # Cascada Mapa → Lugar: no se puede desbloquear un lugar de un mapa cerrado.
+    if not is_map_unlocked(user, place.map):
+        raise UnlockError("El mapa del lugar no está desbloqueado.", code="map_locked")
+
     if via == UserPlaceUnlock.Via.FREE:
         # El lugar gratuito es único: se valida antes de permitir repetir/compactar.
         if free_place_used(user):
             raise UnlockError(
                 "Ya usaste tu lugar gratuito.", code="free_place_already_used"
             )
-        if not is_map_unlocked(user, place.map):
-            raise UnlockError("El mapa del lugar no está disponible.", code="map_locked")
 
     if is_place_unlocked(user, place):
         return get_or_create_progression(user)
 
     progression = get_or_create_progression(user)
     if via == UserPlaceUnlock.Via.COINS:
-        _spend_coins(progression, constants.COIN_COST_PLACE)
+        _spend_coins(progression, place_unlock_cost(place))
 
     UserPlaceUnlock.objects.create(user=user, place=place, via=via)
     return progression
@@ -151,15 +182,53 @@ def unlock_question_type(user, question_type: QuestionType) -> Progression:
 
 # ----- Preguntas disponibles y generación de quizzes ----------------------
 
-def available_questions(user, maps) -> "models.QuerySet[Question]":
-    """Preguntas de los lineups de lugares desbloqueados, con tipos habilitados."""
-    place_ids = get_unlocked_place_ids(user)
-    types = get_unlocked_question_types(user)
-    return Question.objects.filter(
-        map__in=maps,
-        lineup__place_id__in=place_ids,
-        type__in=types,
-    ).select_related("lineup__place", "map")
+def available_questions(
+    user,
+    maps,
+    places_only: bool = False,
+    place_ids=None,
+    question_type: str | None = None,
+) -> "models.QuerySet[Question]":
+    """Preguntas disponibles según desbloqueos y filtros de selección.
+
+    Con `places_only=True` (primer quiz del usuario) se devuelven SOLO las
+    preguntas de lugar (map_location) de los lugares desbloqueados, para que
+    el primer quiz enseñe dónde están los lugares elegidos.
+
+    Con `place_ids` se acota a las preguntas de esos lugares (se cruza con los
+    desbloqueados). Con `question_type` se filtra a un solo tipo.
+
+    En modo completo (los mapas ya llegan filtrados como accesibles):
+    - pregunta con lineup → se desbloquea con el lugar del lineup;
+    - pregunta de lugar (sin lineup) → se desbloquea con ese lugar;
+    - pregunta de mapa (sin lineup ni lugar) → solo requiere el mapa accesible.
+    """
+    unlocked = get_unlocked_place_ids(user)
+    types = [question_type] if question_type else get_unlocked_question_types(user)
+
+    if places_only:
+        scope = place_ids if place_ids is not None else unlocked
+        return (
+            Question.objects.filter(
+                map__in=maps,
+                type=QuestionType.MAP_LOCATION,
+                place_id__in=scope,
+            ).select_related("map", "place")
+        )
+
+    base = Question.objects.filter(map__in=maps, type__in=types)
+    if place_ids is not None:
+        # Selección explícita de lugares: solo preguntas de esos lugares.
+        scope = set(place_ids) & unlocked
+        return base.filter(
+            Q(lineup__place_id__in=scope) | Q(place_id__in=scope)
+        ).select_related("map", "lineup__place", "place")
+
+    return base.filter(
+        Q(lineup__isnull=True, place__isnull=True)
+        | Q(lineup__isnull=False, lineup__place_id__in=unlocked)
+        | Q(lineup__isnull=True, place_id__in=unlocked)
+    ).select_related("map", "lineup__place", "place")
 
 
 # ----- Respuestas (solo contadores) ----------------------------------------

@@ -12,14 +12,27 @@ class QuestionType(models.TextChoices):
 
 
 class Question(models.Model):
-    """Pregunta sobre un lineup. Vive en un mapa y pertenece a un lineup."""
+    """Pregunta de un quiz. Vive en un mapa y puede estar asociada a un
+    lineup, a un lugar (sin lineup) o a ninguno (solo nivel de mapa)."""
 
     map = models.ForeignKey(
         "maps.Map", on_delete=models.CASCADE, related_name="questions"
     )
-    # La pregunta se asocia a un lineup: modelo Mapa → Lugar → Lineup → Pregunta.
+    # Opcional: la pregunta pertenece a un lineup (y por cascada a un lugar).
     lineup = models.ForeignKey(
-        "maps.Lineup", on_delete=models.CASCADE, related_name="questions"
+        "maps.Lineup",
+        on_delete=models.CASCADE,
+        related_name="questions",
+        null=True,
+        blank=True,
+    )
+    # Opcional: pregunta de nivel de lugar (ej. "¿Qué lugar es este?"), sin lineup.
+    place = models.ForeignKey(
+        "maps.Place",
+        on_delete=models.CASCADE,
+        related_name="questions",
+        null=True,
+        blank=True,
     )
     type = models.CharField(
         "tipo", max_length=20, choices=QuestionType.choices

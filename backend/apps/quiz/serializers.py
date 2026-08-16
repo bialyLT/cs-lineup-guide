@@ -24,7 +24,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ["id", "map", "lineup_id", "type", "prompt", "helper_text", "image_url", "options"]
+        fields = ["id", "map", "lineup_id", "place_id", "type", "prompt", "helper_text", "image_url", "options"]
 
 
 class QuizSerializer(serializers.ModelSerializer):

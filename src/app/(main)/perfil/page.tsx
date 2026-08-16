@@ -128,19 +128,26 @@ export default function PerfilPage() {
         <div className="flex items-start gap-2.5">
           <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {me.unlocked.freePlaceUsed ? (
+            {me.unlocked.starterPlacesSelected ? (
               <>
                 Seguí respondiendo quizzes para ganar monedas y desbloquear
                 nuevos lugares, tipos de pregunta y mapas.
               </>
             ) : (
               <>
-                Elegí tu lugar gratuito en un mapa disponible para empezar a
-                practicar sus lineups.
+                Elegí tus primeros lugares para empezar a adivinar dónde están.
               </>
             )}
           </p>
         </div>
+        {!me.unlocked.starterPlacesSelected ? (
+          <Link
+            href="/onboarding"
+            className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-background transition-transform active:scale-[0.98]"
+          >
+            Elegir mis primeros lugares
+          </Link>
+        ) : null}
       </section>
     </div>
   );

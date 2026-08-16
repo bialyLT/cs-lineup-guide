@@ -17,6 +17,8 @@ from .services import (
     get_unlocked_place_ids,
     get_unlocked_question_types,
     is_map_unlocked,
+    select_starter_places,
+    starter_places_selected,
     unlock_map,
     unlock_place,
     unlock_question_type,
@@ -34,6 +36,13 @@ def me_payload(user) -> dict:
             "question_types": sorted(get_unlocked_question_types(user)),
             "free_question_types": constants.DEFAULT_FREE_QUESTION_TYPES,
             "free_place_used": free_place_used(user),
+            "starter_places_selected": starter_places_selected(user),
+        },
+        "costs": {
+            "map": constants.COIN_COST_MAP,
+            "place_base": constants.COIN_COST_PLACE_BASE,
+            "place_step": constants.COIN_COST_PLACE_STEP,
+            "question_type": constants.COIN_COST_QUESTION_TYPE,
         },
     }
 
@@ -42,6 +51,30 @@ class MeView(APIView):
     """GET /api/me/ → usuario + contadores + desbloqueos."""
 
     def get(self, request):
+        return Response(me_payload(request.user))
+
+
+class StarterPlacesView(APIView):
+    """POST /api/me/starter-places/  { place_ids: [int, ...] }
+
+    Elección única de los primeros lugares (mapas gratuitos). El resto de
+    lugares se desbloquea con monedas.
+    """
+
+    def post(self, request):
+        place_ids = request.data.get("place_ids")
+        if not isinstance(place_ids, list):
+            return Response(
+                {"detail": "place_ids debe ser una lista de lugares."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            select_starter_places(request.user, place_ids)
+        except UnlockError as exc:
+            return Response(
+                {"detail": str(exc), "code": exc.code},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(me_payload(request.user))
 
 

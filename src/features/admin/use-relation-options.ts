@@ -15,6 +15,25 @@ export function relationFieldsOf(resource: AdminResourceConfig | undefined) {
 }
 
 /**
+ * Etiqueta de un registro de relación: "A site" o "A site (Mirage)" cuando
+ * hay un campo de contexto (ej. map_name).
+ */
+export function relationLabel(
+  record: Record<string, unknown>,
+  displayField: string,
+  displayContext?: string,
+): string {
+  const label = String(record[displayField] ?? record.id ?? "?");
+  if (displayContext) {
+    const context = record[displayContext];
+    if (context !== null && context !== undefined && context !== "") {
+      return `${label} (${context})`;
+    }
+  }
+  return label;
+}
+
+/**
  * Carga las opciones de los campos de relación de un recurso:
  * para cada relación, un Map<id, label> con los registros del recurso destino.
  */
@@ -32,7 +51,7 @@ export function useRelationOptions(resource: AdminResourceConfig | undefined) {
         options[field.name] = new Map(
           records.map((record) => [
             String(record.id),
-            String(record[field.displayField ?? "id"] ?? record.id),
+            relationLabel(record, field.displayField ?? "id", field.displayContext),
           ]),
         );
       }

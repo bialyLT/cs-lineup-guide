@@ -21,13 +21,16 @@ export class ApiError extends Error {
   }
 }
 
-type Query = Record<string, string | number | boolean | undefined>;
+type QueryValue = string | number | boolean;
+type Query = Record<string, QueryValue | QueryValue[] | undefined>;
 
 function buildUrl(path: string, query?: Query) {
   const url = new URL(`${API_URL}${path.startsWith("/") ? path : `/${path}`}`);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value === undefined) continue;
+      const values = Array.isArray(value) ? value : [value];
+      for (const item of values) url.searchParams.append(key, String(item));
     }
   }
   return url.toString();

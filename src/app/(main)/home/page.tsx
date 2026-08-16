@@ -130,7 +130,13 @@ export default function HomePage() {
               {isLoading ? "Cargando mapas…" : "No hay mapas disponibles."}
             </p>
           ) : (
-            maps.map((map) => <MapCard key={map.id} map={map} />)
+            maps.map((map) => (
+              <MapCard
+                key={map.id}
+                map={map}
+                href={`/mapas/${map.id}`}
+              />
+            ))
           )}
         </div>
       </motion.div>

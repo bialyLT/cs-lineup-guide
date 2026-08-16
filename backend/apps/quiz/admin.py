@@ -10,8 +10,8 @@ class OptionInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ["id", "prompt", "map", "lineup", "type"]
-    list_filter = ["type", "map", "lineup__place"]
+    list_display = ["id", "prompt", "map", "lineup", "place", "type"]
+    list_filter = ["type", "map", "place", "lineup__place"]
     inlines = [OptionInline]
 
 

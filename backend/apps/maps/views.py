@@ -5,7 +5,6 @@ from rest_framework import generics
 from apps.progression.services import (
     get_unlocked_map_slugs,
     get_unlocked_place_ids,
-    is_map_unlocked,
 )
 
 from .models import Map, Place
@@ -32,7 +31,12 @@ class MapListView(generics.ListAPIView):
 
 
 class PlaceListByMapView(generics.ListAPIView):
-    """GET /api/maps/<slug>/places/ → lugares con sus lineups."""
+    """GET /api/maps/<slug>/places/ → lugares con sus lineups.
+
+    Devuelve la estructura completa (aunque el mapa esté bloqueado, así el
+    usuario ve qué puede desbloquear). El estado de cada lugar viene en
+    `unlocked` del serializer.
+    """
 
     serializer_class = PlaceDetailSerializer
     pagination_class = None
@@ -41,8 +45,6 @@ class PlaceListByMapView(generics.ListAPIView):
         map_ = Map.objects.filter(slug=self.kwargs["map_slug"]).first()
         if not map_:
             raise PermissionDenied("Mapa no encontrado.")
-        if not is_map_unlocked(self.request.user, map_):
-            raise PermissionDenied("Este mapa no está desbloqueado.")
         return Place.objects.filter(map=map_.id)
 
     def get_serializer_context(self):

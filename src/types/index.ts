@@ -45,6 +45,9 @@ export interface Map {
   isFree: boolean;
   /** true si el usuario ya lo desbloqueó. */
   unlocked: boolean;
+  /** Costo en monedas para desbloquear el mapa (0 si es gratis). */
+  unlockCost?: number;
+  places: Place[];
 }
 
 export interface Place {
@@ -52,6 +55,12 @@ export interface Place {
   mapId: ID;
   name: string;
   position: Position;
+  /** true si el usuario ya lo desbloqueó. */
+  unlocked?: boolean;
+  /** Costo en monedas para desbloquear este lugar. */
+  unlockCost?: number;
+  /** Lineups del lugar (solo en el detalle del mapa). */
+  lineups?: Lineup[];
 }
 
 export interface Lineup {
@@ -61,6 +70,7 @@ export interface Lineup {
   title: string;
   util: UtilityType;
   positions: Position[];
+  description?: string;
 }
 
 export interface Option {

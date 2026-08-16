@@ -157,6 +157,11 @@ export function AdminForm({
     Record<string, { loaded: boolean; url: string | null }>
   >({});
 
+  // Lugares ya cargados del mapa seleccionado (se marcan como referencia).
+  const [placesByMap, setPlacesByMap] = useState<
+    Record<string, Array<{ id: number; name: string; x: number | null; y: number | null }>>
+  >({});
+
   useEffect(() => {
     if (!positionSource || !positionMapId) return;
     let active = true;
@@ -188,6 +193,32 @@ export function AdminForm({
       active = false;
     };
   }, [positionMapId, positionSource, resource]);
+
+  // Lugares del mapa seleccionado, para mostrarlos como referencia sobre la foto.
+  useEffect(() => {
+    if (!positionSource || !positionMapId) return;
+    let active = true;
+    adminService
+      .list("places", { map: positionMapId })
+      .then((records) => {
+        if (!active) return;
+        const items = records.map((record) => ({
+          id: Number(record.id),
+          name: String(record.name ?? ""),
+          x: record.position_x != null ? Number(record.position_x) : null,
+          y: record.position_y != null ? Number(record.position_y) : null,
+        }));
+        setPlacesByMap((prev) => ({ ...prev, [positionMapId]: items }));
+      })
+      .catch(() => {
+        if (active) {
+          setPlacesByMap((prev) => ({ ...prev, [positionMapId]: [] }));
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [positionMapId, positionSource]);
 
   const optionsOriginalsRef = useRef<Record<string, DraftOption[]>>({});
   const [optionsLoading, setOptionsLoading] = useState(() =>
@@ -619,12 +650,34 @@ if (field.type === "options-editor") {
                         style={{ left: `${x}%`, top: `${y}%` }}
                       />
                     ) : null}
+                    {(placesByMap[positionMapId] ?? [])
+                      .filter(
+                        (place) =>
+                          place.x != null &&
+                          place.y != null &&
+                          String(place.id) !== recordId,
+                      )
+                      .map((place, index) => (
+                        <div
+                          key={place.id}
+                          title={place.name}
+                          className="pointer-events-none absolute z-10 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-[9px] font-semibold text-foreground shadow-sm ring-1 ring-foreground/40"
+                          style={{ left: `${place.x}%`, top: `${place.y}%` }}
+                        >
+                          {index + 1}
+                        </div>
+                      ))}
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent px-2 py-1 text-xs font-medium text-foreground">
                       {hasPosition
                         ? `X: ${x} · Y: ${y}`
                         : "Clic para marcar el lugar"}
                     </div>
                   </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    El marcador rojo es la posición de este lugar. Los números marcan los
+                    lugares ya cargados en el mapa.
+                  </p>
 
                   <div className="flex flex-wrap items-end gap-3">
                     <div className="flex flex-col gap-1">

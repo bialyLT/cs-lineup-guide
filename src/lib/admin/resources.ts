@@ -48,6 +48,9 @@ export interface AdminField {
   resource?: string;
   /** Campo legible del recurso relacionado para opciones y columnas. */
   displayField?: string;
+  /** Campo extra del registro relacionado para desambiguar la etiqueta
+   * (ej. "map_name" → "A site (Mirage)"). */
+  displayContext?: string;
   /** Relación múltiple (ManyToMany). */
   multiple?: boolean;
   step?: string;
@@ -79,6 +82,8 @@ export interface AdminFilter {
   resource?: string;
   /** Para options: "relation": campo legible de las opciones. */
   displayField?: string;
+  /** Para options: "relation": campo extra para desambiguar la etiqueta. */
+  displayContext?: string;
   /** Para options: "select": lista fija de valores. */
   optionsList?: { value: string; label: string }[];
   /** Acota las opciones según otro filtro activo (ej. el lugar depende del mapa:
@@ -228,17 +233,37 @@ export const adminResources: AdminResourceConfig[] = [
     key: "questions",
     label: "Preguntas",
     singular: "Pregunta",
-    description: "Preguntas sobre lineups para los quizzes.",
-    listColumns: ["id", "map", "lineup", "type", "prompt"],
+    description: "Preguntas de los quizzes: de un lineup, de un lugar o del mapa.",
+    listColumns: ["id", "map", "lineup", "place", "type", "prompt"],
     filters: [
       { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
-      { name: "lineup", label: "Lineup", options: "relation", resource: "lineups", displayField: "title", dependsOn: { filter: "map", map: "map" } },
+      { name: "place", label: "Lugar", options: "relation", resource: "places", displayField: "name", displayContext: "map_name", dependsOn: { filter: "map", map: "map" } },
+      { name: "lineup", label: "Lineup", options: "relation", resource: "lineups", displayField: "title", displayContext: "map_name", dependsOn: { filter: "map", map: "map" } },
       { name: "type", label: "Tipo", options: "select", optionsList: QUESTION_TYPES },
     ],
     fields: [
       { name: "id", label: "ID", type: "number", hidden: true },
       { name: "map", label: "Mapa", type: "relation", resource: "maps", displayField: "name", required: true },
-      { name: "lineup", label: "Lineup", type: "relation", resource: "lineups", displayField: "title", required: true },
+      {
+        name: "lineup",
+        label: "Lineup",
+        type: "relation",
+        resource: "lineups",
+        displayField: "title",
+        displayContext: "map_name",
+        nullable: true,
+        helpText: "Opcional: dejalo vacío para preguntas de lugar o del mapa.",
+      },
+      {
+        name: "place",
+        label: "Lugar",
+        type: "relation",
+        resource: "places",
+        displayField: "name",
+        displayContext: "map_name",
+        nullable: true,
+        helpText: "Opcional: preguntas de un lugar (sin lineup). Si también cargás un lineup, la pregunta queda ligada a ese lineup.",
+      },
       { name: "type", label: "Tipo", type: "select", options: QUESTION_TYPES, required: true },
       { name: "prompt", label: "Enunciado", type: "textarea", required: true },
       { name: "helper_text", label: "Ayuda", type: "textarea" },

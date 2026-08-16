@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Check, Lock } from "lucide-react";
+import { Check, Coins, Lock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -10,28 +10,25 @@ import type { Map } from "@/types";
 interface MapCardProps {
   map: Map;
   selected?: boolean;
+  /** Si se pasa, la tarjeta navega al detalle del mapa (link). */
+  href?: string;
   onToggle?: () => void;
   className?: string;
 }
 
-export function MapCard({ map, selected = false, onToggle, className }: MapCardProps) {
+export function MapCard({ map, selected = false, href, onToggle, className }: MapCardProps) {
   const locked = !map.unlocked;
   const selectable = Boolean(onToggle) && !locked;
 
-  return (
-    <motion.button
-      type="button"
-      whileTap={selectable ? { scale: 0.98 } : undefined}
-      onClick={selectable ? onToggle : undefined}
-      disabled={!selectable}
-      aria-pressed={selected}
-      className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl text-left ring-1 ring-foreground/10 transition-colors",
-        selected && "ring-2 ring-primary",
-        locked && "opacity-70",
-        className,
-      )}
-    >
+  const sharedClass = cn(
+    "group relative flex flex-col overflow-hidden rounded-xl text-left ring-1 ring-foreground/10 transition-colors",
+    selected && "ring-2 ring-primary",
+    locked && "opacity-70",
+    className,
+  );
+
+  const content = (
+    <>
       <div className="relative flex aspect-[4/3] items-center justify-center bg-muted">
         <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:16px_16px]" />
         <span className="relative text-4xl font-bold tracking-tighter text-foreground/15">
@@ -63,11 +60,39 @@ export function MapCard({ map, selected = false, onToggle, className }: MapCardP
             Gratis
           </Badge>
         ) : locked ? (
-          <Badge variant="secondary">Bloqueado</Badge>
+          <Badge variant="secondary" className="gap-1">
+            <Coins className="size-3 text-warning" />
+            {map.unlockCost ?? 0}
+          </Badge>
         ) : (
           <Badge variant="secondary">Desbloqueado</Badge>
         )}
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <motion.a
+        href={href}
+        whileTap={!locked ? { scale: 0.98 } : undefined}
+        className={sharedClass}
+      >
+        {content}
+      </motion.a>
+    );
+  }
+
+  return (
+    <motion.button
+      type="button"
+      whileTap={selectable ? { scale: 0.98 } : undefined}
+      onClick={selectable ? onToggle : undefined}
+      disabled={!selectable}
+      aria-pressed={selected}
+      className={sharedClass}
+    >
+      {content}
     </motion.button>
   );
 }
