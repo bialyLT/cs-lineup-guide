@@ -1,7 +1,8 @@
 import { tokenStore } from "./token-store";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api"
+).replace(/\/+$/, "");
 
 /**
  * Intercambia el refresh token por un par nuevo. Devuelve true si se pudo

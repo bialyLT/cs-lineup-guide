@@ -8,8 +8,9 @@
 import { refreshTokens } from "@/lib/auth/refresh";
 import { tokenStore } from "@/lib/auth/token-store";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api"
+).replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(

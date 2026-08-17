@@ -1119,3 +1119,7 @@
 ✓ Compiled in 4.8s
 ✓ Compiled in 1455ms
 ✓ Compiled in 8s
+✓ Compiled in 3.9s
+ GET /home 200 in 2.9s (next.js: 1572ms, application-code: 1292ms)
+✓ Compiled in 1480ms
+ GET /home 200 in 355ms (next.js: 77ms, application-code: 278ms)
