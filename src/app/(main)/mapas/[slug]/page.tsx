@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mapService } from "@/lib/api/map.service";
 import { userService } from "@/lib/api/user.service";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Place } from "@/types";
 
@@ -52,14 +53,41 @@ export default function MapDetailPage() {
     queryFn: userService.me,
   });
   const coins = me?.progression.coins ?? 0;
+  const remainingStarter = me?.unlocked.remainingStarterPlaces ?? 0;
 
   const unlock = useMutation({
-    mutationFn: ({ kind, id }: { kind: "map" | "place"; id: string | number }) =>
-      userService.unlock(kind, id),
-    onSuccess: (payload) => {
+    mutationFn: ({
+      kind,
+      id,
+      via,
+    }: {
+      kind: "map" | "place" | "lineup";
+      id: string | number;
+      via?: "coins" | "starter";
+    }) => userService.unlock(kind, id, via),
+    onSuccess: (payload, variables) => {
       queryClient.setQueryData(["me"], payload);
       queryClient.invalidateQueries({ queryKey: ["maps"] });
       queryClient.invalidateQueries({ queryKey: ["map-places", slug] });
+      const itemId = String(variables.id);
+      if (variables.kind === "map") {
+        const name = maps.find((item) => item.id === itemId)?.name ?? "el mapa";
+        toast.success(`¡Desbloqueaste ${name}!`);
+      } else if (variables.kind === "lineup") {
+        const lineup = places
+          .flatMap((place) => place.lineups ?? [])
+          .find((item) => String(item.id) === itemId);
+        toast.success(
+          `¡Desbloqueaste el lineup "${lineup?.title ?? "sin nombre"}"! Te quedan ${payload.progression.coins} monedas.`,
+        );
+      } else {
+        const name = places.find((item) => item.id === itemId)?.name ?? "el lugar";
+        toast.success(
+          variables.via === "starter"
+            ? `¡Desbloqueaste ${name} gratis!`
+            : `¡Desbloqueaste ${name}! Te quedan ${payload.progression.coins} monedas.`,
+        );
+      }
     },
     onError: (err) => {
       setError(err instanceof Error ? err.message : "No se pudo desbloquear.");
@@ -78,7 +106,7 @@ export default function MapDetailPage() {
     return (
       <div className="flex flex-col gap-6">
         <Link
-          href="/home"
+          href="/mapas"
           className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
@@ -97,7 +125,7 @@ export default function MapDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       <Link
-        href="/home"
+        href="/mapas"
         className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
@@ -175,7 +203,7 @@ export default function MapDetailPage() {
           mapImageUrl={map.imageUrl}
           places={places}
           onPlaceClick={(place) => {
-            if (place.unlocked) toggleOpen(place.id);
+            if (!locked) toggleOpen(place.id);
           }}
         />
       ) : null}
@@ -187,6 +215,14 @@ export default function MapDetailPage() {
             {places.filter((place) => place.unlocked).length} de {places.length} desbloqueados
           </span>
         </div>
+        {!locked && remainingStarter > 0 ? (
+          <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            Te quedan{" "}
+            <span className="font-semibold text-foreground">{remainingStarter}</span>{" "}
+            {remainingStarter === 1 ? "lugar inicial gratis" : "lugares iniciales gratis"}{" "}
+            para desbloquear sin gastar monedas.
+          </p>
+        ) : null}
         {places.length === 0 ? (
           <p className="text-sm text-muted-foreground">Este mapa no tiene lugares todavía.</p>
         ) : (
@@ -195,13 +231,23 @@ export default function MapDetailPage() {
               key={place.id}
               place={place}
               locked={locked}
+              coins={coins}
               canAfford={coins >= (place.unlockCost ?? 0)}
+              remainingStarter={remainingStarter}
               expanded={open.includes(place.id)}
               unlocking={unlock.isPending}
               onToggle={() => toggleOpen(place.id)}
               onUnlock={() => {
                 setError("");
                 unlock.mutate({ kind: "place", id: place.id });
+              }}
+              onUnlockStarter={() => {
+                setError("");
+                unlock.mutate({ kind: "place", id: place.id, via: "starter" });
+              }}
+              onUnlockLineup={(lineupId) => {
+                setError("");
+                unlock.mutate({ kind: "lineup", id: lineupId });
               }}
             />
           ))
@@ -266,22 +312,33 @@ function MapOverview({
 function PlaceRow({
   place,
   locked,
+  coins,
   canAfford,
   expanded,
   unlocking,
+  remainingStarter,
   onToggle,
   onUnlock,
+  onUnlockStarter,
+  onUnlockLineup,
 }: {
   place: Place;
+  /** true si el MAPA está bloqueado. */
   locked: boolean;
+  coins: number;
   canAfford: boolean;
   expanded: boolean;
   unlocking: boolean;
+  remainingStarter: number;
   onToggle: () => void;
   onUnlock: () => void;
+  onUnlockStarter: () => void;
+  onUnlockLineup: (lineupId: string) => void;
 }) {
   const isUnlocked = Boolean(place.unlocked);
   const lineups = place.lineups ?? [];
+  const unlockedLineups = lineups.filter((lineup) => lineup.unlocked).length;
+  const canExpand = !locked;
 
   return (
     <div className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
@@ -294,20 +351,24 @@ function PlaceRow({
         >
           <MapPin className="size-4" />
         </span>
-        <div className="flex min-w-0 flex-1 flex-col">
+        <button
+          type="button"
+          onClick={onToggle}
+          disabled={!canExpand}
+          aria-expanded={expanded}
+          className="flex min-w-0 flex-1 flex-col items-start text-left"
+        >
           <span className="truncate text-sm font-semibold">{place.name}</span>
-          {isUnlocked ? (
-            <span className="text-xs text-muted-foreground">
-              {lineups.length === 0
+          <span className="text-xs text-muted-foreground">
+            {lineups.length > 0
+              ? `${unlockedLineups} de ${lineups.length} lineups desbloqueados`
+              : isUnlocked
                 ? "Sin lineups todavía"
-                : `${lineups.length} ${lineups.length === 1 ? "lineup" : "lineups"}`}
-            </span>
-          ) : (
-            <span className="text-xs text-muted-foreground">
-              {locked ? "Requiere el mapa desbloqueado" : "Bloqueado"}
-            </span>
-          )}
-        </div>
+                : locked
+                  ? "Requiere el mapa desbloqueado"
+                  : "Bloqueado"}
+          </span>
+        </button>
 
         {isUnlocked ? (
           <Button variant="ghost" size="sm" aria-pressed={expanded} onClick={onToggle}>
@@ -319,6 +380,16 @@ function PlaceRow({
           <Badge variant="secondary" className="gap-1">
             <Lock className="size-3" />
           </Badge>
+        ) : remainingStarter > 0 ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={unlocking}
+            onClick={onUnlockStarter}
+          >
+            <Unlock className="size-3.5" />
+            Gratis
+          </Button>
         ) : (
           <Button
             size="sm"
@@ -331,22 +402,42 @@ function PlaceRow({
         )}
       </div>
 
-      {isUnlocked && expanded ? (
-        <div className="flex flex-col border-t border-border/60 px-3 py-2">
+      {canExpand && expanded ? (
+        <div className="flex flex-col border-t border-border/60 px-3 py-1">
           {lineups.length === 0 ? (
-            <p className="py-1 text-xs text-muted-foreground">
+            <p className="py-2 text-xs text-muted-foreground">
               Todavía no hay lineups en este lugar.
             </p>
           ) : (
             lineups.map((lineup) => (
-              <div key={lineup.id} className="flex flex-col gap-1 py-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{UTIL_LABELS[lineup.util] ?? lineup.util}</Badge>
-                  <span className="text-sm font-medium">{lineup.title}</span>
+              <div key={lineup.id} className="flex items-center gap-2 border-b border-border/40 py-2 last:border-b-0">
+                <Badge variant="secondary" className="shrink-0">
+                  {UTIL_LABELS[lineup.util] ?? lineup.util}
+                </Badge>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-sm font-medium">{lineup.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {lineup.questionCount ?? 0} {lineup.questionCount === 1 ? "pregunta" : "preguntas"}
+                  </span>
+                  {lineup.description ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground">{lineup.description}</p>
+                  ) : null}
                 </div>
-                {lineup.description ? (
-                  <p className="text-xs text-muted-foreground">{lineup.description}</p>
-                ) : null}
+                {lineup.unlocked ? (
+                  <Badge variant="secondary" className="shrink-0">
+                    Desbloqueado
+                  </Badge>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="shrink-0"
+                    disabled={coins < (lineup.unlockCost ?? 0) || unlocking}
+                    onClick={() => onUnlockLineup(String(lineup.id))}
+                  >
+                    <Coins className="size-3.5" />
+                    {lineup.unlockCost ?? 0}
+                  </Button>
+                )}
               </div>
             ))
           )}

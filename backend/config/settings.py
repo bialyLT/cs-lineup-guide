@@ -61,7 +61,17 @@ SECRET_KEY = os.environ.get(
     "dev-insecure-key-lineuplab-2026-change-me-please-0123456789abcdef",
 )
 DEBUG = env_bool("DJANGO_DEBUG", default=True)
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["*"]) if DEBUG else env_list("DJANGO_ALLOWED_HOSTS")
+
+# Railway expone el dominio del servicio en RAILWAY_PUBLIC_DOMAIN: se agrega
+# solo para que el backend funcione sin configurar ALLOWED_HOSTS a mano.
+_railway_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
+if DEBUG:
+    ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["*"])
+else:
+    hosts = env_list("DJANGO_ALLOWED_HOSTS")
+    if _railway_domain and _railway_domain not in hosts:
+        hosts.append(_railway_domain)
+    ALLOWED_HOSTS = hosts or ["*"]
 
 # Sign in with Google (ID token). Vacío deshabilita el login con Google.
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
@@ -89,8 +99,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -153,7 +164,19 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# En Railway/Vercel el TLS lo termina el proxy: se confía en el header
+# X-Forwarded-Proto para que Django genere URLs https correctas.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 # Django REST Framework --------------------------------------------------
 

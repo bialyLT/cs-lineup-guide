@@ -62,6 +62,9 @@ export interface AdminField {
   nullable?: boolean;
   /** Carpeta destino en el bucket para type: "image". */
   uploadTo?: string;
+  /** Para type: "image": si el registro tiene valor en la relación indicada
+   * (ej. "lineup"), elige una imagen de esa relación en vez de subir una. */
+  imageSource?: { relationField: string; resource: string };
   /** Para type: "map-position": la relación cuyo registro tiene la imagen del mapa
    * (ej. { relationField: "map", imageField: "image_url" }). */
   positionSource?: { relationField: string; imageField: string };
@@ -214,18 +217,55 @@ export const adminResources: AdminResourceConfig[] = [
     label: "Lineups",
     singular: "Lineup",
     description: "Lineups concretos dentro de un lugar.",
-    listColumns: ["id", "place", "title", "util", "order"],
+    listColumns: ["id", "place", "title", "util", "question_count", "order"],
     filters: [
       { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
-      { name: "place", label: "Lugar", options: "relation", resource: "places", displayField: "name", dependsOn: { filter: "map", map: "map" } },
+      { name: "place", label: "Lugar", options: "relation", resource: "places", displayField: "name", displayContext: "map_name", dependsOn: { filter: "map", map: "map" } },
       { name: "util", label: "Utilidad", options: "select", optionsList: UTILITY_TYPES },
     ],
     fields: [
       { name: "id", label: "ID", type: "number", hidden: true },
-      { name: "place", label: "Lugar", type: "relation", resource: "places", displayField: "name", required: true },
+      { name: "place", label: "Lugar", type: "relation", resource: "places", displayField: "name", displayContext: "map_name", required: true },
       { name: "title", label: "Título", type: "text", required: true },
       { name: "util", label: "Utilidad", type: "select", options: UTILITY_TYPES, required: true },
       { name: "description", label: "Descripción", type: "textarea" },
+      { name: "order", label: "Orden", type: "number" },
+    ],
+    rowLink: {
+      label: "Imágenes",
+      href: (id) => `/admin/lineup-images?lineup=${id}`,
+    },
+  },
+  {
+    key: "lineup-images",
+    label: "Imágenes de lineup",
+    singular: "Imagen de lineup",
+    description: "Galería de imágenes de cada lineup. Las preguntas de un lineup eligen una de estas imágenes.",
+    listColumns: ["id", "lineup", "image_url", "order"],
+    filters: [
+      { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
+      {
+        name: "lineup",
+        label: "Lineup",
+        options: "relation",
+        resource: "lineups",
+        displayField: "title",
+        displayContext: "map_name",
+        dependsOn: { filter: "map", map: "map" },
+      },
+    ],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      {
+        name: "lineup",
+        label: "Lineup",
+        type: "relation",
+        resource: "lineups",
+        displayField: "title",
+        displayContext: "map_name",
+        required: true,
+      },
+      { name: "image_url", label: "Imagen", type: "image", uploadTo: "questions" },
       { name: "order", label: "Orden", type: "number" },
     ],
   },
@@ -267,7 +307,14 @@ export const adminResources: AdminResourceConfig[] = [
       { name: "type", label: "Tipo", type: "select", options: QUESTION_TYPES, required: true },
       { name: "prompt", label: "Enunciado", type: "textarea", required: true },
       { name: "helper_text", label: "Ayuda", type: "textarea" },
-      { name: "image_url", label: "Imagen", type: "image", uploadTo: "questions" },
+      {
+        name: "image_url",
+        label: "Imagen",
+        type: "image",
+        uploadTo: "questions",
+        imageSource: { relationField: "lineup", resource: "lineup-images" },
+        helpText: "Si la pregunta tiene un lineup, elegí una de sus imágenes. Sin lineup, subís una.",
+      },
       {
         name: "options",
         label: "Opciones de respuesta",
@@ -360,8 +407,20 @@ export const adminResources: AdminResourceConfig[] = [
     fields: [
       { name: "id", label: "ID", type: "number", hidden: true },
       { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
-      { name: "place", label: "Lugar", type: "relation", resource: "places", displayField: "name", required: true },
+      { name: "place", label: "Lugar", type: "relation", resource: "places", displayField: "name", displayContext: "map_name", required: true },
       { name: "via", label: "Vía", type: "select", options: UNLOCK_VIA },
+      { name: "unlocked_at", label: "Desbloqueado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "lineup-unlocks",
+    label: "Desbloqueos de lineup",
+    singular: "Desbloqueo de lineup",
+    listColumns: ["id", "user", "lineup", "unlocked_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
+      { name: "lineup", label: "Lineup", type: "relation", resource: "lineups", displayField: "title", displayContext: "map_name", required: true },
       { name: "unlocked_at", label: "Desbloqueado", type: "datetime", readOnly: true },
     ],
   },
@@ -376,6 +435,39 @@ export const adminResources: AdminResourceConfig[] = [
       { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", required: true },
       { name: "question_type", label: "Tipo de pregunta", type: "select", options: QUESTION_TYPES, required: true },
       { name: "unlocked_at", label: "Desbloqueado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "question-types",
+    label: "Tipos de pregunta",
+    singular: "Tipo de pregunta",
+    description: "Configura qué tipos de pregunta se desbloquean desde el inicio y a qué nivel, con sus restricciones.",
+    listColumns: ["id", "question_type", "label", "unlock_level", "order"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      {
+        name: "question_type",
+        label: "Tipo de pregunta",
+        type: "select",
+        options: QUESTION_TYPES,
+        required: true,
+        helpText: "Identificador fijo del tipo; no conviene cambiarlo.",
+      },
+      { name: "label", label: "Etiqueta", type: "text", required: true },
+      {
+        name: "unlock_level",
+        label: "Nivel de desbloqueo",
+        type: "number",
+        nullable: true,
+        helpText: "0 = desde el inicio. 1+ = nivel requerido. Vacío = solo con monedas.",
+      },
+      { name: "order", label: "Orden", type: "number" },
+      {
+        name: "utility_levels",
+        label: "Niveles por utilidad",
+        type: "textarea",
+        helpText: 'Solo para "¿Qué utilidad lanzar?": JSON {"smoke": 2, "molotov": 3, "flashbang": 4, "he": 5, "decoy": 6}.',
+      },
     ],
   },
   {

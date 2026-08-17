@@ -11,7 +11,8 @@ interface ReferencePointProps {
   position: Position;
   state?: PointState;
   onClick?: () => void;
-  label?: number;
+  /** Número o texto de la opción: el texto se muestra como una píldora. */
+  label?: number | string;
   className?: string;
 }
 
@@ -29,6 +30,7 @@ export function ReferencePoint({
   label,
   className,
 }: ReferencePointProps) {
+  const isText = typeof label === "string" && label.length > 0;
   return (
     <motion.button
       type="button"
@@ -38,17 +40,26 @@ export function ReferencePoint({
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={onClick}
       className={cn(
-        "absolute z-10 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 shadow-sm outline-none",
+        "absolute z-10 -translate-x-1/2 -translate-y-1/2 shadow-sm outline-none",
+        isText
+          ? "max-w-[45%] rounded-full border px-2.5 py-1 text-center text-xs font-semibold leading-tight"
+          : "flex size-6 items-center justify-center rounded-full border-2 text-[10px] font-semibold",
         stateStyles[state],
         onClick && "cursor-pointer",
         className,
       )}
       style={{ left: `${position.x}%`, top: `${position.y}%` }}
     >
-      <span className="absolute inset-1 rounded-full border border-current opacity-60" />
-      {label !== undefined ? (
-        <span className="relative text-[10px] font-semibold leading-none">{label}</span>
-      ) : null}
+      {isText ? (
+        <span className="leading-tight">{label}</span>
+      ) : (
+        <>
+          <span className="absolute inset-1 rounded-full border border-current opacity-60" />
+          {label !== undefined ? (
+            <span className="relative text-[10px] font-semibold leading-none">{label}</span>
+          ) : null}
+        </>
+      )}
     </motion.button>
   );
 }

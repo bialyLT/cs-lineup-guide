@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { ImagePlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -153,6 +154,33 @@ export function AdminForm({
     positionSource && positionRelationField
       ? String(effectiveValue(positionRelationField) ?? "")
       : "";
+
+  // Imagen elegida desde una relación (ej. imágenes del lineup en preguntas):
+  // cuando la relación tiene valor, se muestran las imágenes para elegir.
+  const imageSourceField = editable.find(
+    (field) => field.type === "image" && field.imageSource,
+  );
+  const imageSourceRelationField = imageSourceField?.imageSource
+    ? resource.fields.find(
+        (field) => field.name === imageSourceField.imageSource?.relationField,
+      )
+    : undefined;
+  const imageSourceConfig = imageSourceField?.imageSource;
+  const imageSourceId =
+    imageSourceConfig && imageSourceRelationField
+      ? String(effectiveValue(imageSourceRelationField) ?? "")
+      : "";
+
+  const sourceImagesQuery = useQuery({
+    queryKey: ["admin-source-images", imageSourceConfig?.resource, imageSourceId],
+    queryFn: () => {
+      if (!imageSourceConfig) return Promise.resolve([]);
+      return adminService.list(imageSourceConfig.resource, {
+        [imageSourceConfig.relationField]: imageSourceId,
+      });
+    },
+    enabled: Boolean(imageSourceConfig && imageSourceId),
+  });
   const [mapImageData, setMapImageData] = useState<
     Record<string, { loaded: boolean; url: string | null }>
   >({});
@@ -464,6 +492,77 @@ export function AdminForm({
             : current
               ? String(current)
               : null;
+
+          if (field.imageSource && imageSourceId) {
+            const sourceImages = sourceImagesQuery.data ?? [];
+            return (
+              <div key={field.name} className="flex flex-col gap-1.5">
+                <Label>{field.label}</Label>
+                {sourceImagesQuery.isLoading ? (
+                  <p className="text-sm text-muted-foreground">
+                    Cargando imágenes del lineup…
+                  </p>
+                ) : sourceImages.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Este lineup no tiene imágenes todavía. Agregalas desde{" "}
+                    <Link
+                      href={`/admin/lineup-images?lineup=${imageSourceId}`}
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      Imágenes de lineup
+                    </Link>
+                    .
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {sourceImages.map((img) => {
+                      const url = String(img.image_url ?? "");
+                      const isSelected = String(current) === url;
+                      return (
+                        <button
+                          key={String(img.id)}
+                          type="button"
+                          onClick={() => setValue(field.name, url)}
+                          aria-pressed={isSelected}
+                          className={cn(
+                            "relative aspect-video overflow-hidden rounded-lg ring-1 transition-colors",
+                            isSelected
+                              ? "ring-2 ring-primary"
+                              : "ring-foreground/10 hover:ring-foreground/30",
+                          )}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={url}
+                            alt="Imagen del lineup"
+                            className="h-full w-full object-cover"
+                          />
+                          {isSelected ? (
+                            <span className="absolute inset-x-0 bottom-0 bg-primary px-1 py-0.5 text-center text-[10px] font-semibold text-primary-foreground">
+                              Seleccionada
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {current ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(field)}
+                    className="w-fit text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                  >
+                    Quitar imagen
+                  </button>
+                ) : null}
+                {field.helpText ? (
+                  <p className="text-xs text-muted-foreground">{field.helpText}</p>
+                ) : null}
+              </div>
+            );
+          }
+
           return (
             <div key={field.name} className="flex flex-col gap-1.5">
               <Label>{field.label}</Label>
@@ -525,6 +624,7 @@ if (field.type === "options-editor") {
           const config = field.optionsEditor;
           const imageUrl = config
             ? pendingFiles[config.imageField]?.preview ||
+              String(values[config.imageField] ?? "") ||
               String(initialValues?.[config.imageField] ?? "") ||
               null
             : null;

@@ -12,11 +12,13 @@ interface MapCardProps {
   selected?: boolean;
   /** Si se pasa, la tarjeta navega al detalle del mapa (link). */
   href?: string;
+  /** Porcentaje de desbloqueo (0-100): muestra la barra de progreso. */
+  progress?: number;
   onToggle?: () => void;
   className?: string;
 }
 
-export function MapCard({ map, selected = false, href, onToggle, className }: MapCardProps) {
+export function MapCard({ map, selected = false, href, progress, onToggle, className }: MapCardProps) {
   const locked = !map.unlocked;
   const selectable = Boolean(onToggle) && !locked;
 
@@ -29,11 +31,22 @@ export function MapCard({ map, selected = false, href, onToggle, className }: Ma
 
   const content = (
     <>
-      <div className="relative flex aspect-[4/3] items-center justify-center bg-muted">
-        <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:16px_16px]" />
-        <span className="relative text-4xl font-bold tracking-tighter text-foreground/15">
-          {map.name.charAt(0)}
-        </span>
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {map.imageUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={map.imageUrl}
+            alt={`Mapa ${map.name}`}
+            className="absolute inset-0 size-full object-cover"
+          />
+        ) : (
+          <>
+            <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:16px_16px]" />
+            <span className="relative text-4xl font-bold tracking-tighter text-foreground/15">
+              {map.name.charAt(0)}
+            </span>
+          </>
+        )}
         {locked ? (
           <span className="absolute inset-0 flex items-center justify-center bg-background/30">
             <span className="flex size-9 items-center justify-center rounded-full bg-background/80 text-muted-foreground shadow-sm">
@@ -68,6 +81,20 @@ export function MapCard({ map, selected = false, href, onToggle, className }: Ma
           <Badge variant="secondary">Desbloqueado</Badge>
         )}
       </div>
+      {progress !== undefined ? (
+        <div className="px-3 pb-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Desbloqueo</span>
+            <span className="font-semibold tabular-nums">{Math.round(progress)}%</span>
+          </div>
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all"
+              style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
     </>
   );
 

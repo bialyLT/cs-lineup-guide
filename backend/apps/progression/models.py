@@ -64,6 +64,25 @@ class UserPlaceUnlock(models.Model):
         verbose_name_plural = "desbloqueos de lugar"
 
 
+class UserLineupUnlock(models.Model):
+    """Desbloqueo de un lineup pagado con monedas (candado separado del lugar)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="lineup_unlocks"
+    )
+    lineup = models.ForeignKey(
+        "maps.Lineup", on_delete=models.CASCADE, related_name="user_unlocks"
+    )
+    unlocked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "lineup"], name="unique_lineup_unlock")
+        ]
+        verbose_name = "desbloqueo de lineup"
+        verbose_name_plural = "desbloqueos de lineup"
+
+
 class UserQuestionTypeUnlock(models.Model):
     """Desbloqueo de un tipo de pregunta (candado separado del lugar/lineup)."""
 
@@ -85,3 +104,44 @@ class UserQuestionTypeUnlock(models.Model):
         ]
         verbose_name = "desbloqueo de tipo de pregunta"
         verbose_name_plural = "desbloqueos de tipo de pregunta"
+
+
+class QuestionTypeConfig(models.Model):
+    """Configuración de desbloqueo de cada tipo de pregunta.
+
+    Cada tipo tiene un nivel de desbloqueo (0 = desde el inicio, 1+ = nivel
+    requerido, vacío = solo con monedas) y, para el tipo de utilidad, los
+    niveles por utilidad (restricción: la pregunta exige además la utilidad
+    del lineup desbloqueada). El admin la edita desde "Tipos de pregunta".
+    """
+
+    question_type = models.CharField(
+        "tipo de pregunta",
+        max_length=20,
+        unique=True,
+        choices=QuestionType.choices,
+    )
+    label = models.CharField("etiqueta", max_length=100)
+    unlock_level = models.PositiveIntegerField(
+        "nivel de desbloqueo",
+        null=True,
+        blank=True,
+        help_text="0 = desde el inicio. 1+ = nivel requerido. Vacío = solo con monedas.",
+    )
+    order = models.PositiveSmallIntegerField("orden", default=0)
+    utility_levels = models.TextField(
+        "niveles por utilidad",
+        blank=True,
+        help_text=(
+            'Solo para "¿Qué utilidad lanzar?": JSON '
+            '{"smoke": 2, "molotov": 3, "flashbang": 4, "he": 5, "decoy": 6}.'
+        ),
+    )
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "configuración de tipo de pregunta"
+        verbose_name_plural = "configuración de tipos de pregunta"
+
+    def __str__(self) -> str:
+        return self.label

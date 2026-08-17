@@ -8,9 +8,11 @@ password solo se acepta de forma write_only para crearlo/cambiarlo.
 from rest_framework import serializers
 
 from apps.accounts.models import User
-from apps.maps.models import Lineup, Map, Place
+from apps.maps.models import Lineup, LineupImage, Map, Place
 from apps.progression.models import (
     Progression,
+    QuestionTypeConfig,
+    UserLineupUnlock,
     UserMapUnlock,
     UserPlaceUnlock,
     UserQuestionTypeUnlock,
@@ -81,10 +83,43 @@ class AdminPlaceSerializer(serializers.ModelSerializer):
 
 class AdminLineupSerializer(serializers.ModelSerializer):
     map_name = serializers.CharField(source="place.map.name", read_only=True)
+    place_name = serializers.CharField(source="place.name", read_only=True)
+    question_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Lineup
-        fields = ["id", "place", "map_name", "title", "util", "description", "order"]
+        fields = [
+            "id",
+            "place",
+            "place_name",
+            "map_name",
+            "title",
+            "util",
+            "description",
+            "order",
+            "question_count",
+        ]
+        read_only_fields = ["id"]
+
+    def get_question_count(self, obj: Lineup) -> int:
+        # Con prefetch_related("questions") usa la cache, sin consulta extra.
+        return len(obj.questions.all())
+
+
+class AdminLineupImageSerializer(serializers.ModelSerializer):
+    map_name = serializers.CharField(source="lineup.place.map.name", read_only=True)
+    lineup_title = serializers.CharField(source="lineup.title", read_only=True)
+
+    class Meta:
+        model = LineupImage
+        fields = [
+            "id",
+            "lineup",
+            "lineup_title",
+            "map_name",
+            "image_url",
+            "order",
+        ]
         read_only_fields = ["id"]
 
 
@@ -162,11 +197,25 @@ class AdminUserPlaceUnlockSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "unlocked_at"]
 
 
+class AdminUserLineupUnlockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserLineupUnlock
+        fields = ["id", "user", "lineup", "unlocked_at"]
+        read_only_fields = ["id", "unlocked_at"]
+
+
 class AdminUserQuestionTypeUnlockSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuestionTypeUnlock
         fields = ["id", "user", "question_type", "unlocked_at"]
         read_only_fields = ["id", "unlocked_at"]
+
+
+class AdminQuestionTypeConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionTypeConfig
+        fields = ["id", "question_type", "label", "unlock_level", "order", "utility_levels"]
+        read_only_fields = ["id"]
 
 
 class AdminAuditLogSerializer(serializers.ModelSerializer):

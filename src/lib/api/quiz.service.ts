@@ -16,6 +16,7 @@ export interface ApiQuestion {
   prompt: string;
   helper_text?: string | null;
   image_url?: string | null;
+  lineup_title?: string | null;
   options: ApiOption[];
 }
 
@@ -41,6 +42,7 @@ export function mapApiQuestion(raw: ApiQuestion): Question {
     prompt: raw.prompt,
     helperText: raw.helper_text ?? undefined,
     imageUrl: raw.image_url ?? undefined,
+    lineupTitle: raw.lineup_title ?? undefined,
     options: raw.options.map(mapApiOption),
   };
 }
@@ -66,6 +68,8 @@ export interface AnswerResponse {
 export interface CreateQuizOptions {
   /** Solo preguntas de estos lugares (ids numéricos). */
   placeIds?: number[];
+  /** Solo preguntas de estos lineups desbloqueados (ids numéricos). */
+  lineupIds?: number[];
   /** Un solo tipo de pregunta. */
   questionType?: string;
   /** Cantidad de preguntas (máximo: las disponibles para la selección). */
@@ -75,6 +79,7 @@ export interface CreateQuizOptions {
 export interface QuizAvailabilityQuery {
   maps: string[];
   placeIds?: number[];
+  lineupIds?: number[];
   type?: string;
 }
 
@@ -86,6 +91,7 @@ export const quizService = {
       .post<ApiQuiz>("/quizzes/generate/", {
         map_ids: mapIds,
         ...(opts.placeIds?.length ? { place_ids: opts.placeIds } : {}),
+        ...(opts.lineupIds?.length ? { lineup_ids: opts.lineupIds } : {}),
         ...(opts.questionType ? { question_type: opts.questionType } : {}),
         ...(opts.count ? { count: opts.count } : {}),
       })
@@ -96,6 +102,7 @@ export const quizService = {
     apiClient.get<{ available: number }>("/quizzes/available/", {
       maps: query.maps,
       place_id: query.placeIds?.length ? query.placeIds : undefined,
+      lineup_id: query.lineupIds?.length ? query.lineupIds : undefined,
       type: query.type,
     }),
   /** Envía la respuesta y actualiza contadores en el servidor. */

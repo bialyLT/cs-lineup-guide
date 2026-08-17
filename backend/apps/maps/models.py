@@ -69,3 +69,28 @@ class Lineup(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class LineupImage(models.Model):
+    """Imagen de un lineup. Cada lineup puede tener varias: se reusan entre
+    preguntas del mismo lineup (el enunciado cambia, la imagen no)."""
+
+    lineup = models.ForeignKey(
+        Lineup, on_delete=models.CASCADE, related_name="images"
+    )
+    image_url = models.URLField("imagen")
+    order = models.PositiveSmallIntegerField("orden", default=0)
+    created_at = models.DateTimeField("creado", auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["lineup", "image_url"], name="unique_lineup_image_url"
+            )
+        ]
+        verbose_name = "imagen de lineup"
+        verbose_name_plural = "imágenes de lineup"
+
+    def __str__(self) -> str:
+        return f"{self.lineup.title} · {self.image_url}"

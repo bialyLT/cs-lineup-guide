@@ -1,5 +1,33 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Despliegue
+
+El backend es Django REST Framework y va a **Railway**; el frontend es Next.js y va a **Vercel**. Reutilizan la base Postgres (Neon) que ya se usa en desarrollo.
+
+### Backend → Railway
+
+1. Creá el servicio a partir del repo y fijá **Root Directory = `backend`**.
+2. Railway detecta `requirements.txt`, `Procfile` y `runtime.txt`. El `Procfile` aplica migraciones y `collectstatic` antes de levantar Gunicorn.
+3. Variables de entorno (mirá `backend/.env.example`):
+   - `DJANGO_DEBUG=0`
+   - `DJANGO_SECRET_KEY` (clave aleatoria)
+   - `DATABASE_URL` → la misma de Neon (recomendado para conservar los datos)
+   - `DJANGO_ALLOWED_HOSTS` → dominio del backend (Railway agrega `RAILWAY_PUBLIC_DOMAIN` solo)
+   - `CORS_ALLOWED_ORIGINS` → `https://<frontend.vercel.app>`
+   - `DJANGO_CSRF_TRUSTED_ORIGINS` → `https://<backend.up.railway.app>`
+   - `GOOGLE_CLIENT_ID` y las variables `R2_*` igual que en desarrollo.
+
+### Frontend → Vercel
+
+1. Importá el repo y dejá el build por defecto (`npm run build`, ya verificado).
+2. Variables de entorno (mirá `.env.example`):
+   - `NEXT_PUBLIC_API_URL=https://<backend.up.railway.app>/api`
+   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (el mismo de desarrollo)
+
+### Google OAuth
+
+En Google Cloud Console → Credenciales OAuth, agregá el origen de producción del frontend en "Orígenes de JavaScript autorizados". Si el backend usa un dominio propio, agregá su URI de redirección en "URIs de redireccionamiento autorizados".
+
 ## Getting Started
 
 First, run the development server:

@@ -1,3 +1,1122 @@
 ⚠ Warning: Next.js ignored package-lock.json in C:\Users\Usuario because it is outside the current Git repository (C:\Users\Usuario\Documents\visual\project-cs2-guide-lineups).
  To use this directory, set `turbopack.root` in your Next.js config.
 
+[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
+[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at Set.forEach (<anonymous>) (<anonymous>)
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at Set.forEach (<anonymous>) (<anonymous>)
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at Set.forEach (<anonymous>) (<anonymous>)
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at Set.forEach (<anonymous>) (<anonymous>)
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+    at Set.forEach (<anonymous>) (<anonymous>)
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Encountered two children with the same key, `[object Object]`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. 
+[browser] Uncaught Error: Objects are not valid as a React child (found: object with keys {value, enabled}). If you meant to render a collection of children, use an array instead.
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used. (https://accounts.google.com/gsi/client:87:460)
+[browser] ./src/features/admin/options-editor.tsx:146:12
+Error: Expected '</', got ';'
+  144 |               {option.text.trim() ? option.text : index + 1}
+  145 |             </button>
+> 146 |           );
+      |            ^
+  147 |         })}
+  148 |       </div>
+  149 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/features/admin/options-editor.tsx [Client Component Browser]
+    ./src/features/admin/admin-form.tsx [Client Component Browser]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Client Component Browser]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/features/admin/options-editor.tsx [Client Component SSR]
+    ./src/features/admin/admin-form.tsx [Client Component SSR]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Client Component SSR]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Server Component] 
+[browser] ./src/features/admin/options-editor.tsx:146:12
+Error: Expected '</', got ';'
+  144 |               {option.text.trim() ? option.text : index + 1}
+  145 |             </button>
+> 146 |           );
+      |            ^
+  147 |         })}
+  148 |       </div>
+  149 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/features/admin/options-editor.tsx [Client Component Browser]
+    ./src/features/admin/admin-form.tsx [Client Component Browser]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Client Component Browser]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/features/admin/options-editor.tsx [Client Component SSR]
+    ./src/features/admin/admin-form.tsx [Client Component SSR]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Client Component SSR]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Server Component] 
+[browser] ./src/features/admin/options-editor.tsx:146:12
+Error: Expected '</', got ';'
+  144 |               {option.text.trim() ? option.text : index + 1}
+  145 |             </button>
+> 146 |           );
+      |            ^
+  147 |         })}
+  148 |       </div>
+  149 |
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/features/admin/options-editor.tsx [Client Component Browser]
+    ./src/features/admin/admin-form.tsx [Client Component Browser]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Client Component Browser]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/features/admin/options-editor.tsx [Client Component SSR]
+    ./src/features/admin/admin-form.tsx [Client Component SSR]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Client Component SSR]
+    ./src/app/(admin)/admin/[resource]/[id]/page.tsx [Server Component] 
+[Server HMR] Update failed, full reload needed: SyntaxError: Identifier 'LINEUP_TITLE_TYPES' has already been declared
+    at eval (<anonymous>)
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 
+[browser] ./src/app/(main)/quiz/page.tsx:27:7
+Error: the name `LINEUP_TITLE_TYPES` is defined multiple times
+  25 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+  26 | // Tipos que muestran el título del lineup en la pregunta.
+> 27 | const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
+     |       ^^^^^^^^^^^^^^^^^^
+  28 |
+  29 | type Phase = "answering" | "feedback" | "done";
+  30 |
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/(main)/quiz/page.tsx [Client Component Browser]
+    ./src/app/(main)/quiz/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/(main)/quiz/page.tsx [Client Component SSR]
+    ./src/app/(main)/quiz/page.tsx [Server Component] 

@@ -31,7 +31,7 @@ export function QuestionImage({
     <div
       className={cn(
         "relative w-full overflow-hidden rounded-xl ring-1 ring-foreground/10",
-        aspectRatio,
+        !src && aspectRatio,
         className,
       )}
     >
@@ -40,7 +40,7 @@ export function QuestionImage({
         <img
           src={src}
           alt={alt}
-          className="absolute inset-0 size-full object-cover"
+          className="block h-auto w-full"
         />
       ) : (
         <div

@@ -124,25 +124,25 @@ export function OptionsEditor({
         />
         {value.map((option, index) => (
           <button
-            key={option.key}
-            type="button"
-            aria-label={`Opción ${index + 1}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              setSelectedKey(option.key);
-            }}
-            className={cn(
-              "absolute flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold shadow-md transition-colors",
-              option.is_correct
-                ? "bg-green-600 text-white"
-                : "bg-foreground text-background",
-              selectedKey === option.key && "ring-2 ring-destructive",
-            )}
-            style={{ left: `${option.x}%`, top: `${option.y}%` }}
-            title={option.text || `Opción ${index + 1}`}
-          >
-            {index + 1}
-          </button>
+              key={option.key}
+              type="button"
+              aria-label={`Opción ${index + 1}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                setSelectedKey(option.key);
+              }}
+              className={cn(
+                "absolute max-w-[45%] -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-1 text-center text-xs font-semibold shadow-md transition-colors",
+                option.is_correct
+                  ? "bg-green-600 text-white"
+                  : "bg-foreground text-background",
+                selectedKey === option.key && "ring-2 ring-destructive",
+              )}
+              style={{ left: `${option.x}%`, top: `${option.y}%` }}
+              title={option.text || `Opción ${index + 1}`}
+            >
+              {option.text.trim() ? option.text : index + 1}
+            </button>
         ))}
       </div>
 

@@ -3,8 +3,10 @@ from django.core.exceptions import PermissionDenied
 from rest_framework import generics
 
 from apps.progression.services import (
+    get_unlocked_lineup_ids,
     get_unlocked_map_slugs,
     get_unlocked_place_ids,
+    unlocked_places_per_map,
 )
 
 from .models import Map, Place
@@ -18,13 +20,17 @@ class MapListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return Map.objects.all()
+        return Map.objects.prefetch_related(
+            "places__lineups__questions", "places__lineups__images"
+        ).all()
 
     def get_serializer_context(self):
         return {
             "context": {
                 "unlocked_map_slugs": get_unlocked_map_slugs(self.request.user),
                 "unlocked_place_ids": get_unlocked_place_ids(self.request.user),
+                "unlocked_lineup_ids": get_unlocked_lineup_ids(self.request.user),
+                "unlocked_places_per_map": unlocked_places_per_map(self.request.user),
             },
             "request": self.request,
         }
@@ -45,12 +51,18 @@ class PlaceListByMapView(generics.ListAPIView):
         map_ = Map.objects.filter(slug=self.kwargs["map_slug"]).first()
         if not map_:
             raise PermissionDenied("Mapa no encontrado.")
-        return Place.objects.filter(map=map_.id)
+        return (
+            Place.objects.select_related("map")
+            .prefetch_related("lineups__questions", "lineups__images")
+            .filter(map=map_.id)
+        )
 
     def get_serializer_context(self):
         return {
             "context": {
                 "unlocked_place_ids": get_unlocked_place_ids(self.request.user),
+                "unlocked_lineup_ids": get_unlocked_lineup_ids(self.request.user),
+                "unlocked_places_per_map": unlocked_places_per_map(self.request.user),
             },
             "request": self.request,
         }

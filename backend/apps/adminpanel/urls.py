@@ -9,6 +9,7 @@ router.register("users", views.UserViewSet, basename="admin-users")
 router.register("maps", views.MapViewSet, basename="admin-maps")
 router.register("places", views.PlaceViewSet, basename="admin-places")
 router.register("lineups", views.LineupViewSet, basename="admin-lineups")
+router.register("lineup-images", views.LineupImageViewSet, basename="admin-lineup-images")
 router.register("questions", views.QuestionViewSet, basename="admin-questions")
 router.register("options", views.OptionViewSet, basename="admin-options")
 router.register("quizzes", views.QuizViewSet, basename="admin-quizzes")
@@ -25,9 +26,17 @@ router.register(
     "place-unlocks", views.UserPlaceUnlockViewSet, basename="admin-place-unlocks"
 )
 router.register(
+    "lineup-unlocks", views.UserLineupUnlockViewSet, basename="admin-lineup-unlocks"
+)
+router.register(
     "question-type-unlocks",
     views.UserQuestionTypeUnlockViewSet,
     basename="admin-question-type-unlocks",
+)
+router.register(
+    "question-types",
+    views.QuestionTypeConfigViewSet,
+    basename="admin-question-types",
 )
 router.register(
     "audit-logs", views.AdminAuditLogViewSet, basename="admin-audit-logs"

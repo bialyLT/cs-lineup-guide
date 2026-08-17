@@ -7,6 +7,9 @@ interface ApiLineup {
   title: string;
   util: string;
   description?: string | null;
+  unlocked?: boolean;
+  unlock_cost?: number | null;
+  question_count?: number | null;
 }
 
 interface ApiPlace {
@@ -18,6 +21,13 @@ interface ApiPlace {
   lineups?: ApiLineup[];
 }
 
+interface ApiUnlockStats {
+  total_places: number;
+  unlocked_places: number;
+  total_lineups: number;
+  unlocked_lineups: number;
+}
+
 export interface ApiMap {
   id: string;
   name: string;
@@ -25,6 +35,7 @@ export interface ApiMap {
   is_free: boolean;
   unlocked: boolean;
   unlock_cost?: number | null;
+  unlock_stats?: ApiUnlockStats | null;
   places?: ApiPlace[];
 }
 
@@ -37,6 +48,9 @@ function mapApiLineup(raw: ApiLineup, mapId: string): Lineup {
     util: raw.util as UtilityType,
     positions: [],
     description: raw.description ?? undefined,
+    unlocked: raw.unlocked,
+    unlockCost: raw.unlock_cost ?? undefined,
+    questionCount: raw.question_count ?? undefined,
   };
 }
 
@@ -63,6 +77,14 @@ function mapApiMap(raw: ApiMap): Map {
     isFree: raw.is_free,
     unlocked: raw.unlocked,
     unlockCost: raw.unlock_cost ?? undefined,
+    unlockStats: raw.unlock_stats
+      ? {
+          totalPlaces: raw.unlock_stats.total_places,
+          unlockedPlaces: raw.unlock_stats.unlocked_places,
+          totalLineups: raw.unlock_stats.total_lineups,
+          unlockedLineups: raw.unlock_stats.unlocked_lineups,
+        }
+      : undefined,
     places: (raw.places ?? []).map((place) => mapApiPlace(place, raw.id)),
   };
 }

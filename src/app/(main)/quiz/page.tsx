@@ -18,11 +18,13 @@ import { QuizProgress } from "@/features/quiz/components/quiz-progress";
 import { ReferencePoint } from "@/features/quiz/components/reference-point";
 
 const LETTERS = ["A", "B", "C", "D"];
-// Espejo de apps/progression/constants.py (XP_PER_CORRECT).
-const XP_PER_CORRECT = 20;
+// Espejo de apps/progression/constants.py.
+const XP_PER_CORRECT = 25;
+const COINS_PER_CORRECT = 10;
+// Tipos donde conviene mostrar el título del lineup como referencia.
+const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
 
 type Phase = "answering" | "feedback" | "done";
-
 export default function QuizPage() {
   const router = useRouter();
   const [quiz] = useState(quizSession.load);
@@ -35,7 +37,7 @@ export default function QuizPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!quiz) router.replace("/mapas");
+    if (!quiz) router.replace("/quiz/crear");
   }, [quiz, router]);
 
   const answer = useMutation({
@@ -65,7 +67,7 @@ export default function QuizPage() {
   const isLast = index === total - 1;
   const isVisual = question.options.some((option) => option.position);
   const earnedXp = correctCount * XP_PER_CORRECT;
-  const earnedCoins = correctCount * 2;
+  const earnedCoins = correctCount * COINS_PER_CORRECT;
 
   function handleNext() {
     if (isLast) {
@@ -150,7 +152,15 @@ export default function QuizPage() {
           transition={{ duration: 0.18, ease: "easeOut" }}
           className="flex flex-1 flex-col gap-5"
         >
-          <QuestionCard prompt={question.prompt} helperText={question.helperText} />
+          <QuestionCard
+            prompt={question.prompt}
+            helperText={question.helperText}
+            lineupTitle={
+              LINEUP_TITLE_TYPES.includes(question.type)
+                ? question.lineupTitle
+                : undefined
+            }
+          />
 
           {phase === "feedback" && result ? (
             <QuizFeedback
@@ -189,7 +199,7 @@ export default function QuizPage() {
                     key={option.id}
                     position={option.position}
                     state={state}
-                    label={i + 1}
+                    label={option.text || String(i + 1)}
                     onClick={phase === "answering" ? () => setSelectedId(option.id) : undefined}
                   />
                 );

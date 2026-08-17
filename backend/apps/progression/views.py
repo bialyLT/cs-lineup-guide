@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.serializers import UserSerializer
-from apps.maps.models import Map, Place
+from apps.maps.models import Lineup, Map, Place
 from apps.quiz.models import QuestionType
 
 from . import constants
@@ -12,13 +12,19 @@ from .serializers import ProgressionSerializer
 from .services import (
     UnlockError,
     free_place_used,
+    get_free_question_types,
     get_or_create_progression,
+    get_question_type_configs,
+    get_unlocked_lineup_ids,
     get_unlocked_map_slugs,
     get_unlocked_place_ids,
     get_unlocked_question_types,
+    get_unlocked_utilities,
     is_map_unlocked,
+    remaining_starter_places,
     select_starter_places,
     starter_places_selected,
+    unlock_lineup,
     unlock_map,
     unlock_place,
     unlock_question_type,
@@ -33,15 +39,29 @@ def me_payload(user) -> dict:
         "unlocked": {
             "maps": sorted(get_unlocked_map_slugs(user)),
             "places": sorted(get_unlocked_place_ids(user)),
+            "lineups": sorted(get_unlocked_lineup_ids(user)),
+            "utilities": sorted(get_unlocked_utilities(user)),
             "question_types": sorted(get_unlocked_question_types(user)),
-            "free_question_types": constants.DEFAULT_FREE_QUESTION_TYPES,
+            "free_question_types": get_free_question_types(),
+            "question_type_configs": [
+                {
+                    "question_type": config.question_type,
+                    "label": config.label,
+                    "unlock_level": config.unlock_level,
+                    "order": config.order,
+                    "utility_levels": config.utility_levels,
+                }
+                for config in get_question_type_configs()
+            ],
             "free_place_used": free_place_used(user),
             "starter_places_selected": starter_places_selected(user),
+            "remaining_starter_places": remaining_starter_places(user),
         },
         "costs": {
             "map": constants.COIN_COST_MAP,
             "place_base": constants.COIN_COST_PLACE_BASE,
             "place_step": constants.COIN_COST_PLACE_STEP,
+            "lineup": constants.COIN_COST_LINEUP,
             "question_type": constants.COIN_COST_QUESTION_TYPE,
         },
     }
@@ -103,19 +123,32 @@ class FreePlaceView(APIView):
 
 
 class UnlockView(APIView):
-    """POST /api/me/unlock/  { kind: "map"|"place"|"question_type", id }"""
+    """POST /api/me/unlock/  { kind: "map"|"place"|"lineup"|"question_type", id }
+
+    Para kind="place", `via` opcional: "coins" (default), "starter" (usar un
+    lugar inicial disponible) o "free" (el lugar gratuito único).
+    """
 
     def post(self, request):
         kind = request.data.get("kind")
         identifier = request.data.get("id")
+        via = request.data.get("via") or UserPlaceUnlock.Via.COINS
 
         try:
             if kind == "map":
                 map_ = Map.objects.get(slug=identifier)
                 unlock_map(request.user, map_)
             elif kind == "place":
+                if via not in UserPlaceUnlock.Via.values:
+                    return Response(
+                        {"detail": "Vía de desbloqueo inválida."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
                 place = Place.objects.get(pk=identifier)
-                unlock_place(request.user, place, via=UserPlaceUnlock.Via.COINS)
+                unlock_place(request.user, place, via=via)
+            elif kind == "lineup":
+                lineup = Lineup.objects.get(pk=identifier)
+                unlock_lineup(request.user, lineup)
             elif kind == "question_type":
                 unlock_question_type(request.user, QuestionType(identifier))
             else:
@@ -130,6 +163,10 @@ class UnlockView(APIView):
         except Place.DoesNotExist:
             return Response(
                 {"detail": "Lugar no encontrado."}, status=status.HTTP_404_NOT_FOUND
+            )
+        except Lineup.DoesNotExist:
+            return Response(
+                {"detail": "Lineup no encontrado."}, status=status.HTTP_404_NOT_FOUND
             )
         except ValueError:
             return Response(

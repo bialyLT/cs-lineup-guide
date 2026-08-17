@@ -21,10 +21,24 @@ class OptionSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     map = serializers.SlugRelatedField(slug_field="slug", read_only=True)
     options = OptionSerializer(many=True, read_only=True)
+    lineup_title = serializers.CharField(
+        source="lineup.title", read_only=True, default=None
+    )
 
     class Meta:
         model = Question
-        fields = ["id", "map", "lineup_id", "place_id", "type", "prompt", "helper_text", "image_url", "options"]
+        fields = [
+            "id",
+            "map",
+            "lineup_id",
+            "place_id",
+            "type",
+            "prompt",
+            "helper_text",
+            "image_url",
+            "lineup_title",
+            "options",
+        ]
 
 
 class QuizSerializer(serializers.ModelSerializer):
@@ -38,6 +52,8 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "map_ids", "questions"]
 
     def get_questions(self, obj: Quiz):
-        quiz_questions = obj.quiz_questions.select_related("question").order_by("order")
+        quiz_questions = obj.quiz_questions.select_related(
+            "question__lineup", "question__place"
+        ).order_by("order")
         questions = [qq.question for qq in quiz_questions]
         return QuestionSerializer(questions, many=True, context=self.context).data

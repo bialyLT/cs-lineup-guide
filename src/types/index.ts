@@ -37,6 +37,14 @@ export interface User {
   isStaff?: boolean;
 }
 
+/** Conteos de desbloqueo de un mapa (lugares y lineups). */
+export interface MapUnlockStats {
+  totalPlaces: number;
+  unlockedPlaces: number;
+  totalLineups: number;
+  unlockedLineups: number;
+}
+
 export interface Map {
   id: ID;
   name: string;
@@ -47,6 +55,8 @@ export interface Map {
   unlocked: boolean;
   /** Costo en monedas para desbloquear el mapa (0 si es gratis). */
   unlockCost?: number;
+  /** Conteos de desbloqueo de lugares y lineups. */
+  unlockStats?: MapUnlockStats;
   places: Place[];
 }
 
@@ -71,6 +81,12 @@ export interface Lineup {
   util: UtilityType;
   positions: Position[];
   description?: string;
+  /** true si el usuario ya lo desbloqueó (con monedas). */
+  unlocked?: boolean;
+  /** Costo en monedas para desbloquear este lineup (0 si ya está desbloqueado). */
+  unlockCost?: number;
+  /** Cuántas preguntas están asociadas a este lineup. */
+  questionCount?: number;
 }
 
 export interface Option {
@@ -87,6 +103,8 @@ export interface Question {
   prompt: string;
   helperText?: string;
   imageUrl?: string;
+  /** Título del lineup asociado (si la pregunta pertenece a uno). */
+  lineupTitle?: string;
   /** usa las últimas utilidades previstas (ej. "MOL84"). */
   keyCombo?: string;
   options: Option[];

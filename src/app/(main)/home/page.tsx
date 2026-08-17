@@ -91,7 +91,7 @@ export default function HomePage() {
 
       <motion.div variants={item}>
         <Link
-          href="/mapas"
+          href="/quiz/crear"
           className="flex flex-col gap-3 rounded-xl bg-foreground p-5 text-background transition-transform active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">

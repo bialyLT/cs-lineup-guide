@@ -44,9 +44,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // El quiz y el onboarding tienen su propio encabezado / foco.
+  // El quiz (jugando) y el onboarding tienen su propio encabezado / foco.
   const isOnboarding = pathname === "/onboarding";
-  const showAppHeader = !pathname.startsWith("/quiz") && !isOnboarding;
+  const showAppHeader = pathname !== "/quiz" && !isOnboarding;
 
   return (
     <div className="min-h-dvh">

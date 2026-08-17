@@ -11,28 +11,34 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 
 from apps.accounts.models import User
-from apps.maps.models import Lineup, Map, Place
+from apps.maps.models import Lineup, LineupImage, Map, Place
 from apps.progression.models import (
     Progression,
+    QuestionTypeConfig,
+    UserLineupUnlock,
     UserMapUnlock,
     UserPlaceUnlock,
     UserQuestionTypeUnlock,
 )
 from apps.quiz.models import Option, Question, Quiz, QuizQuestion
+from apps.quiz.services import sync_map_location_questions
 
 from .mixins import AuditLogMixin
 from .models import AdminAuditLog
 from .permissions import IsStaffUser
 from .serializers import (
     AdminAuditLogSerializer,
+    AdminLineupImageSerializer,
     AdminLineupSerializer,
     AdminMapSerializer,
     AdminOptionSerializer,
     AdminPlaceSerializer,
     AdminProgressionSerializer,
     AdminQuestionSerializer,
+    AdminQuestionTypeConfigSerializer,
     AdminQuizQuestionSerializer,
     AdminQuizSerializer,
+    AdminUserLineupUnlockSerializer,
     AdminUserMapUnlockSerializer,
     AdminUserPlaceUnlockSerializer,
     AdminUserQuestionTypeUnlockSerializer,
@@ -73,13 +79,26 @@ class PlaceViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(map_id=map_id)
         return queryset
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        sync_map_location_questions(instance.map)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        sync_map_location_questions(instance.map)
+
+    def perform_destroy(self, instance):
+        map_ = instance.map
+        instance.delete()
+        sync_map_location_questions(map_)
+
 
 class LineupViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
     """Soporta `?map=<id>`, `?place=<id>` y `?util=<value>`."""
     serializer_class = AdminLineupSerializer
 
     def get_queryset(self):
-        queryset = Lineup.objects.select_related("place__map").all()
+        queryset = Lineup.objects.select_related("place__map").prefetch_related("questions")
         map_id = self.request.query_params.get("map")
         if map_id:
             queryset = queryset.filter(place__map_id=map_id)
@@ -89,6 +108,19 @@ class LineupViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
         util = self.request.query_params.get("util")
         if util:
             queryset = queryset.filter(util=util)
+        return queryset
+
+
+class LineupImageViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
+    """Imágenes de un lineup (galería). Soporta `?lineup=<id>`."""
+
+    serializer_class = AdminLineupImageSerializer
+
+    def get_queryset(self):
+        queryset = LineupImage.objects.select_related("lineup__place__map").all()
+        lineup_id = self.request.query_params.get("lineup")
+        if lineup_id:
+            queryset = queryset.filter(lineup_id=lineup_id)
         return queryset
 
 
@@ -150,9 +182,22 @@ class UserPlaceUnlockViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
     serializer_class = AdminUserPlaceUnlockSerializer
 
 
+class UserLineupUnlockViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
+    queryset = UserLineupUnlock.objects.select_related("user", "lineup__place__map").all()
+    serializer_class = AdminUserLineupUnlockSerializer
+
+
 class UserQuestionTypeUnlockViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
     queryset = UserQuestionTypeUnlock.objects.select_related("user").all()
     serializer_class = AdminUserQuestionTypeUnlockSerializer
+
+
+class QuestionTypeConfigViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
+    """Configuración global del desbloqueo de tipos de pregunta
+    (nivel 0 = inicial, 1+ = nivel, vacío = monedas; niveles por utilidad)."""
+
+    queryset = QuestionTypeConfig.objects.all()
+    serializer_class = AdminQuestionTypeConfigSerializer
 
 
 class AdminAuditLogViewSet(AdminViewSetMixin, viewsets.ReadOnlyModelViewSet):

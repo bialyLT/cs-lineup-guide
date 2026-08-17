@@ -23,7 +23,7 @@ def show(label, response):
 import time
 
 username = f"smoke_{int(time.time()) % 1000000}"
-c = Client()
+c = Client(HTTP_HOST="localhost")
 r = c.post(
     f"{BASE}/api/auth/register/",
     data={"username": username, "email": f"{username}@lineup.com", "password": "supersecret1"},
@@ -32,7 +32,7 @@ r = c.post(
 show("register", r)
 access = r.json()["access"]
 
-c = Client(HTTP_AUTHORIZATION=f"Bearer {access}")
+c = Client(HTTP_HOST="localhost", HTTP_AUTHORIZATION=f"Bearer {access}")
 
 # 2. Mapas
 r = c.get(f"{BASE}/api/maps/")
