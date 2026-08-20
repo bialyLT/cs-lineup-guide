@@ -33,6 +33,8 @@ export default function QuizPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("answering");
   const [correctCount, setCorrectCount] = useState(0);
+  const [earnedXp, setEarnedXp] = useState(0);
+  const [earnedCoins, setEarnedCoins] = useState(0);
   const [result, setResult] = useState<AnswerResponse | null>(null);
   const [error, setError] = useState("");
 
@@ -41,11 +43,17 @@ export default function QuizPage() {
   }, [quiz, router]);
 
   const answer = useMutation({
-    mutationFn: (vars: { questionId: string; optionId: string }) =>
-      quizService.submitAnswer(vars.questionId, vars.optionId),
+    mutationFn: (vars: { questionId: string; optionId: string }) => {
+      if (!quiz) throw new Error("Quiz no disponible.");
+      return quizService.submitAnswer(quiz.id, vars.questionId, vars.optionId);
+    },
     onSuccess: (resp) => {
       setResult(resp);
       if (resp.correct) setCorrectCount((value) => value + 1);
+      if (resp.correct && resp.awarded) {
+        setEarnedXp((value) => value + XP_PER_CORRECT);
+        setEarnedCoins((value) => value + COINS_PER_CORRECT);
+      }
       setPhase("feedback");
     },
     onError: (err) => {
@@ -66,8 +74,6 @@ export default function QuizPage() {
   const total = questions.length;
   const isLast = index === total - 1;
   const isVisual = question.options.some((option) => option.position);
-  const earnedXp = correctCount * XP_PER_CORRECT;
-  const earnedCoins = correctCount * COINS_PER_CORRECT;
 
   function handleNext() {
     if (isLast) {
@@ -86,6 +92,8 @@ export default function QuizPage() {
     setSelectedId(null);
     setResult(null);
     setCorrectCount(0);
+    setEarnedXp(0);
+    setEarnedCoins(0);
     setError("");
     setPhase("answering");
   }
@@ -187,7 +195,9 @@ export default function QuizPage() {
               state={result.correct ? "correct" : "incorrect"}
               message={
                 result.correct
-                  ? `¡Correcto! +${XP_PER_CORRECT} XP`
+                  ? result.awarded
+                    ? `¡Correcto! +${XP_PER_CORRECT} XP`
+                    : "¡Correcto!"
                   : "Incorrecto"
               }
               correctAnswer={correctAnswerText}

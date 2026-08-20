@@ -58,6 +58,8 @@ export function mapApiQuiz(raw: ApiQuiz): Quiz {
 
 export interface AnswerResponse {
   correct: boolean;
+  /** true si esta respuesta otorgó XP/monedas (la primera de cada pregunta en un quiz). */
+  awarded: boolean;
   /** Id de la opción correcta (para mostrarla al fallar). */
   correctOptionId?: string;
   xp: number;
@@ -107,19 +109,21 @@ export const quizService = {
       lineup_id: query.lineupIds?.length ? query.lineupIds : undefined,
       type: query.type,
     }),
-  /** Envía la respuesta y actualiza contadores en el servidor. */
-  submitAnswer: (questionId: ID, optionId: ID): Promise<AnswerResponse> =>
+  /** Envía la respuesta de una pregunta dentro de un quiz y actualiza contadores. */
+  submitAnswer: (quizId: ID, questionId: ID, optionId: ID): Promise<AnswerResponse> =>
     apiClient
       .post<{
         correct: boolean;
+        awarded: boolean;
         correct_option_id?: number | null;
         xp: number;
         coins: number;
         streak: number;
         best_streak: number;
-      }>(`/questions/${questionId}/answer/`, { option_id: Number(optionId) })
+      }>(`/quizzes/${quizId}/questions/${questionId}/answer/`, { option_id: Number(optionId) })
       .then((raw) => ({
         correct: raw.correct,
+        awarded: raw.awarded,
         correctOptionId:
           raw.correct_option_id != null ? String(raw.correct_option_id) : undefined,
         xp: raw.xp,

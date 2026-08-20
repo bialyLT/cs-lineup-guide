@@ -1,7 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts.throttles import UserScopedRateThrottle
 from apps.progression.services import (
     get_or_create_progression,
     get_unlocked_map_slugs,
@@ -9,7 +11,7 @@ from apps.progression.services import (
 )
 from apps.maps.models import Map
 
-from .models import Option, Question
+from .models import Option, Quiz, QuizAnswer, QuizQuestion
 from .serializers import QuizSerializer
 from .services import (
     QuizGenerationError,
@@ -45,6 +47,9 @@ class GenerateQuizView(APIView):
         )
         question_type = serializers.CharField(required=False, allow_blank=True)
         count = serializers.IntegerField(required=False, min_value=1)
+
+    throttle_classes = [UserScopedRateThrottle]
+    throttle_scope = "quiz_generate"
 
     def post(self, request):
         input_ = self.InputSerializer(data=request.data)
@@ -107,29 +112,70 @@ class QuizAvailabilityView(APIView):
 
 
 class AnswerQuestionView(APIView):
-    """POST /api/questions/<pk>/answer/  { option_id: int }"""
+    """POST /api/quizzes/<quiz_id>/questions/<pk>/answer/  { option_id: int }
 
-    def post(self, request, pk: int):
-        try:
-            question = Question.objects.get(pk=pk)
-        except Question.DoesNotExist:
+    Solo se puede responder una pregunta de un quiz generado por el propio
+    usuario (el quiz se genera únicamente con contenido desbloqueado), y cada
+    pregunta otorga XP/monedas UNA sola vez por quiz: los reintentos devuelven
+    la corrección (`awarded: false`) pero no vuelven a premiar.
+    """
+
+    throttle_classes = [UserScopedRateThrottle]
+    throttle_scope = "answer"
+
+    @transaction.atomic
+    def post(self, request, quiz_id: int, pk: int):
+        quiz = Quiz.objects.filter(pk=quiz_id, user=request.user).first()
+        if not quiz:
             return Response(
-                {"detail": "Pregunta no encontrada."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": "Quiz no encontrado."}, status=status.HTTP_404_NOT_FOUND
             )
 
-        option_id = request.data.get("option_id")
-        option = Option.objects.filter(pk=option_id, question=question).first()
+        # Bloqueo de fila: dos respuestas concurrentes a la misma pregunta no
+        # pueden cruzar el chequeo de idempotencia y premiar dos veces.
+        quiz_question = (
+            QuizQuestion.objects.select_for_update()
+            .select_related("question")
+            .filter(quiz=quiz, question_id=pk)
+            .first()
+        )
+        if not quiz_question:
+            return Response(
+                {"detail": "La pregunta no pertenece a este quiz."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        option = Option.objects.filter(
+            pk=request.data.get("option_id"), question=quiz_question.question
+        ).first()
         if not option:
             return Response(
                 {"detail": "Opción inválida para esta pregunta."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        progression = record_answer(request.user, correct=option.is_correct)
-        correct_option = Option.objects.filter(question=question, is_correct=True).first()
+        already_answered = QuizAnswer.objects.filter(
+            quiz_question=quiz_question
+        ).exists()
+
+        progression = get_or_create_progression(request.user)
+        if not already_answered:
+            progression = record_answer(
+                request.user, correct=option.is_correct, progression=progression
+            )
+            QuizAnswer.objects.create(
+                quiz_question=quiz_question,
+                option=option,
+                is_correct=option.is_correct,
+            )
+
+        correct_option = Option.objects.filter(
+            question=quiz_question.question, is_correct=True
+        ).first()
         return Response(
             {
                 "correct": option.is_correct,
+                "awarded": not already_answered,
                 "correct_option_id": correct_option.id if correct_option else None,
                 "xp": progression.xp,
                 "coins": progression.coins,

@@ -7,6 +7,7 @@ from google.oauth2 import id_token
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -66,6 +67,8 @@ class RegisterView(APIView):
     """
 
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_register"
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -85,6 +88,8 @@ class AddEmailView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_email"
 
     def post(self, request):
         email = (request.data.get("email") or "").strip().lower()
@@ -128,6 +133,8 @@ class VerifyEmailView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_verify"
 
     def post(self, request):
         code = (request.data.get("code") or "").strip()
@@ -165,6 +172,8 @@ class ResendVerificationView(APIView):
     """POST /api/auth/verify-email/resend/ (autenticado) → nuevo código."""
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_resend"
 
     def post(self, request):
         user = request.user
@@ -203,6 +212,8 @@ class LoginView(APIView):
     """
 
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_login"
 
     def post(self, request):
         identifier = request.data.get("email") or request.data.get("username")
@@ -229,6 +240,8 @@ class GoogleLoginView(APIView):
     """Verifica el ID token de "Sign in with Google" y crea/inicia sesión."""
 
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth_login"
 
     def post(self, request):
         credential = request.data.get("credential")

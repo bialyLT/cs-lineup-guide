@@ -16,6 +16,7 @@ import ast
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,22 +57,33 @@ def parse_database_url(url: str) -> dict[str, str]:
     return db
 
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "dev-insecure-key-lineuplab-2026-change-me-please-0123456789abcdef",
-)
-DEBUG = env_bool("DJANGO_DEBUG", default=True)
+# La clave se exige siempre (dev y prod): si falta, Django no arranca. Nunca
+# hay un valor por defecto comprometido en el código.
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY debe definirse en backend/.env (o en Railway). "
+        "Generala con: openssl rand -hex 48"
+    )
+
+# DEBUG solo se activa explícitamente; por defecto es False (seguro).
+DEBUG = env_bool("DJANGO_DEBUG", default=False)
 
 # Railway expone el dominio del servicio en RAILWAY_PUBLIC_DOMAIN: se agrega
 # solo para que el backend funcione sin configurar ALLOWED_HOSTS a mano.
 _railway_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
 if DEBUG:
-    ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["*"])
+    ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 else:
     hosts = env_list("DJANGO_ALLOWED_HOSTS")
     if _railway_domain and _railway_domain not in hosts:
         hosts.append(_railway_domain)
-    ALLOWED_HOSTS = hosts or ["*"]
+    if not hosts:
+        raise ImproperlyConfigured(
+            "En producción hay que definir DJANGO_ALLOWED_HOSTS "
+            "(y/o RAILWAY_PUBLIC_DOMAIN). No se usa * por defecto."
+        )
+    ALLOWED_HOSTS = hosts
 
 # Sign in with Google (ID token). Vacío deshabilita el login con Google.
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
@@ -178,6 +190,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
+# Protecciones de TLS solo en producción (en dev local se sirve HTTP).
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
 # Django REST Framework --------------------------------------------------
 
 REST_FRAMEWORK = {
@@ -190,6 +211,16 @@ REST_FRAMEWORK = {
         # tienen; las de email/contraseña recién al completar la verificación).
         "apps.accounts.permissions.IsVerifiedUser",
     ),
+    # Límites por scope. Los scopes de auth usan IP; los de juego, usuario.
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_login": "5/min",
+        "auth_register": "3/min",
+        "auth_email": "5/min",
+        "auth_resend": "5/min",
+        "auth_verify": "10/min",
+        "quiz_generate": "20/min",
+        "answer": "60/min",
+    },
 }
 
 from datetime import timedelta  # noqa: E402
@@ -214,11 +245,8 @@ CORS_ALLOWED_ORIGINS = env_list(
 
 R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "")
 R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "")
-R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME", "cslineupsguide")
-R2_ENDPOINT_URL = os.environ.get(
-    "R2_ENDPOINT_URL",
-    "https://97c0b5f961934c102e3b4b8eb9277f0d.r2.cloudflarestorage.com",
-)
+R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME", "")
+R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL", "")
 # URL pública base (dominio r2.dev o custom) para servir las imágenes.
 R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL", "").rstrip("/")
 

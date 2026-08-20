@@ -113,3 +113,30 @@ class QuizQuestion(models.Model):
         ]
         verbose_name = "pregunta de quiz"
         verbose_name_plural = "preguntas de quiz"
+
+
+class QuizAnswer(models.Model):
+    """Respuesta registrada de una pregunta dentro de un quiz (idempotencia).
+
+    Solo la primera respuesta de cada pregunta en un quiz otorga XP/monedas:
+    los reintentos (p. ej. "Repetir quiz") devuelven la corrección pero no
+    vuelven a premiar. Evita farmear monedas respondiendo la misma pregunta.
+    """
+
+    quiz_question = models.OneToOneField(
+        QuizQuestion,
+        on_delete=models.CASCADE,
+        related_name="answer",
+    )
+    option = models.ForeignKey(
+        Option, on_delete=models.CASCADE, related_name="+"
+    )
+    is_correct = models.BooleanField("correcta", default=False)
+    answered_at = models.DateTimeField("respondida", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "respuesta de quiz"
+        verbose_name_plural = "respuestas de quiz"
+
+    def __str__(self) -> str:
+        return f"{self.quiz_question} · {'correcta' if self.is_correct else 'incorrecta'}"
