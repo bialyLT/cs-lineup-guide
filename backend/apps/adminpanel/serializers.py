@@ -16,6 +16,8 @@ from apps.progression.models import (
     UserMapUnlock,
     UserPlaceUnlock,
     UserQuestionTypeUnlock,
+    VideoRewardClaim,
+    VideoRewardConfig,
 )
 from apps.quiz.models import Option, Question, Quiz, QuizQuestion
 
@@ -216,6 +218,22 @@ class AdminQuestionTypeConfigSerializer(serializers.ModelSerializer):
         model = QuestionTypeConfig
         fields = ["id", "question_type", "label", "unlock_level", "order", "utility_levels"]
         read_only_fields = ["id"]
+
+
+class AdminVideoRewardConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoRewardConfig
+        fields = ["id", "coins", "cooldown_hours", "enabled", "video_url"]
+        read_only_fields = ["id"]
+
+
+class AdminVideoRewardClaimSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username", read_only=True)
+
+    class Meta:
+        model = VideoRewardClaim
+        fields = ["id", "user", "username", "claimed_at"]
+        read_only_fields = fields
 
 
 class AdminAuditLogSerializer(serializers.ModelSerializer):

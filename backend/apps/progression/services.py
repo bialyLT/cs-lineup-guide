@@ -23,6 +23,8 @@ from .models import (
     UserMapUnlock,
     UserPlaceUnlock,
     UserQuestionTypeUnlock,
+    VideoRewardClaim,
+    VideoRewardConfig,
 )
 
 
@@ -431,4 +433,56 @@ def record_answer(user, correct: bool, progression: Progression | None = None) -
             "last_streak_at",
         ]
     )
+    return progression
+
+
+# ----- Recompensa por ver un video -----------------------------------------
+
+def video_reward_status(user) -> dict:
+    """Estado del reward por video: si está habilitado, las monedas, el
+    cooldown y si el usuario ya puede reclamar."""
+    config = VideoRewardConfig.get_solo()
+    last_claim = (
+        VideoRewardClaim.objects.filter(user=user).order_by("-claimed_at").first()
+    )
+    next_claim_at = None
+    if last_claim:
+        next_claim_at = last_claim.claimed_at + timedelta(hours=config.cooldown_hours)
+    now = timezone.now()
+    return {
+        "enabled": config.enabled,
+        "coins": config.coins,
+        "cooldown_hours": config.cooldown_hours,
+        "video_url": config.video_url,
+        "eligible": config.enabled and (next_claim_at is None or now >= next_claim_at),
+        "next_claim_at": next_claim_at.isoformat() if next_claim_at else None,
+    }
+
+
+def claim_video_reward(user) -> Progression:
+    """Acredita las monedas del reward por video. Valida el cooldown y el estado
+    server-side; el lock en la fila de progression serializa claims concurrentes."""
+    config = VideoRewardConfig.get_solo()
+    if not config.enabled:
+        raise UnlockError(
+            "El reward por video está deshabilitado.", code="video_reward_disabled"
+        )
+
+    now = timezone.now()
+    with transaction.atomic():
+        progression = get_or_create_progression(user)
+        progression = Progression.objects.select_for_update().get(pk=progression.pk)
+        last_claim = (
+            VideoRewardClaim.objects.filter(user=user).order_by("-claimed_at").first()
+        )
+        if last_claim:
+            cooldown = last_claim.claimed_at + timedelta(hours=config.cooldown_hours)
+            if now < cooldown:
+                raise UnlockError(
+                    "Ya reclamaste recientemente.",
+                    code="video_reward_cooldown",
+                )
+        progression.coins += config.coins
+        progression.save(update_fields=["coins"])
+        VideoRewardClaim.objects.create(user=user, claimed_at=now)
     return progression

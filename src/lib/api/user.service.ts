@@ -180,3 +180,22 @@ export const userService = {
   resendVerification: () =>
     apiClient.post<EmailStepResponse>("/auth/verify-email/resend/", {}),
 };
+
+export interface VideoRewardStatus {
+  enabled: boolean;
+  coins: number;
+  cooldownHours: number;
+  videoUrl: string;
+  eligible: boolean;
+  nextClaimAt: string | null;
+}
+
+export const videoRewardService = {
+  /** GET /video-reward/ → estado del reward por video (monedas, cooldown). */
+  status: (): Promise<VideoRewardStatus> =>
+    apiClient.get<VideoRewardStatus>("/video-reward/"),
+
+  /** POST /video-reward/claim/ → acredita las monedas al terminar el video. */
+  claim: (): Promise<MePayload> =>
+    apiClient.post<ApiMePayload>("/video-reward/claim/", {}).then(mapMePayload),
+};

@@ -39,6 +39,16 @@ router.register(
     basename="admin-question-types",
 )
 router.register(
+    "video-reward-config",
+    views.VideoRewardConfigViewSet,
+    basename="admin-video-reward-config",
+)
+router.register(
+    "video-reward-claims",
+    views.VideoRewardClaimViewSet,
+    basename="admin-video-reward-claims",
+)
+router.register(
     "audit-logs", views.AdminAuditLogViewSet, basename="admin-audit-logs"
 )
 

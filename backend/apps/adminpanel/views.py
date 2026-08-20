@@ -19,6 +19,8 @@ from apps.progression.models import (
     UserMapUnlock,
     UserPlaceUnlock,
     UserQuestionTypeUnlock,
+    VideoRewardClaim,
+    VideoRewardConfig,
 )
 from apps.quiz.models import Option, Question, Quiz, QuizQuestion
 from apps.quiz.services import sync_map_location_questions
@@ -43,6 +45,8 @@ from .serializers import (
     AdminUserPlaceUnlockSerializer,
     AdminUserQuestionTypeUnlockSerializer,
     AdminUserSerializer,
+    AdminVideoRewardClaimSerializer,
+    AdminVideoRewardConfigSerializer,
 )
 from .throttles import AdminBurstThrottle
 
@@ -200,6 +204,20 @@ class QuestionTypeConfigViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
     serializer_class = AdminQuestionTypeConfigSerializer
 
 
+class VideoRewardConfigViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
+    """Configuración global del reward por video (fila única editable por admin)."""
+
+    queryset = VideoRewardConfig.objects.all()
+    serializer_class = AdminVideoRewardConfigSerializer
+
+
+class VideoRewardClaimViewSet(AdminViewSetMixin, viewsets.ReadOnlyModelViewSet):
+    """Reclamos de recompensa por video (solo lectura)."""
+
+    queryset = VideoRewardClaim.objects.select_related("user").all()
+    serializer_class = AdminVideoRewardClaimSerializer
+
+
 class AdminAuditLogViewSet(AdminViewSetMixin, viewsets.ReadOnlyModelViewSet):
     """Solo lectura: el trail de auditoría no se puede editar ni borrar."""
 
@@ -230,6 +248,7 @@ class AdminStatsView(APIView):
                     "map_unlocks": UserMapUnlock.objects.count(),
                     "place_unlocks": UserPlaceUnlock.objects.count(),
                     "question_type_unlocks": UserQuestionTypeUnlock.objects.count(),
+                    "video_reward_claims": VideoRewardClaim.objects.count(),
                     "audit_logs": AdminAuditLog.objects.count(),
                 },
                 "recent_activity": AdminAuditLogSerializer(recent, many=True).data,

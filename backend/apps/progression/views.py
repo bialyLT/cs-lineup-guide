@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.serializers import UserSerializer
+from apps.accounts.throttles import UserScopedRateThrottle
 from apps.maps.models import Lineup, Map, Place
 from apps.quiz.models import QuestionType
 
@@ -12,6 +13,7 @@ from .models import Progression, UserPlaceUnlock
 from .serializers import ProgressionSerializer
 from .services import (
     UnlockError,
+    claim_video_reward,
     free_place_used,
     get_free_question_types,
     get_or_create_progression,
@@ -29,6 +31,7 @@ from .services import (
     unlock_map,
     unlock_place,
     unlock_question_type,
+    video_reward_status,
 )
 
 
@@ -222,3 +225,27 @@ class RankingView(APIView):
                 },
             }
         )
+
+
+class VideoRewardView(APIView):
+    """GET /api/video-reward/ → estado del reward por video (monedas, cooldown)."""
+
+    def get(self, request):
+        return Response(video_reward_status(request.user))
+
+
+class VideoRewardClaimView(APIView):
+    """POST /api/video-reward/claim/ → acredita las monedas al terminar el video."""
+
+    throttle_classes = [UserScopedRateThrottle]
+    throttle_scope = "video_reward_claim"
+
+    def post(self, request):
+        try:
+            claim_video_reward(request.user)
+        except UnlockError as exc:
+            return Response(
+                {"detail": str(exc), "code": exc.code},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(me_payload(request.user))

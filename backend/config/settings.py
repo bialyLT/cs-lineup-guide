@@ -221,6 +221,7 @@ REST_FRAMEWORK = {
         "auth_verify": "10/min",
         "quiz_generate": "20/min",
         "answer": "60/min",
+        "video_reward_claim": "5/min",
     },
 }
 

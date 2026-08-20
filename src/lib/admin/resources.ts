@@ -471,6 +471,41 @@ export const adminResources: AdminResourceConfig[] = [
     ],
   },
   {
+    key: "video-reward-config",
+    label: "Video con recompensa",
+    singular: "Configuración de video",
+    description:
+      "Monedas y cooldown del reward por ver un video (recompensa por publicidad). Fila única.",
+    listColumns: ["id", "coins", "cooldown_hours", "enabled"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "coins", label: "Monedas por video", type: "number", min: 0, required: true },
+      { name: "cooldown_hours", label: "Cooldown (horas)", type: "number", min: 0, required: true },
+      { name: "enabled", label: "Habilitado", type: "boolean" },
+      {
+        name: "video_url",
+        label: "Video (URL o tag)",
+        type: "textarea",
+        helpText:
+          "URL de un video placeholder o, más adelante, el tag HTML/JS de la red de rewarded video (Playwire).",
+      },
+    ],
+  },
+  {
+    key: "video-reward-claims",
+    label: "Reclamos de video",
+    singular: "Reclamo de video",
+    description: "Reclamos de recompensa por video de cada usuario. Solo lectura.",
+    readOnly: true,
+    listColumns: ["id", "username", "claimed_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "user", label: "Usuario", type: "relation", resource: "users", displayField: "username", readOnly: true },
+      { name: "username", label: "Usuario", type: "text", readOnly: true },
+      { name: "claimed_at", label: "Reclamado", type: "datetime", readOnly: true },
+    ],
+  },
+  {
     key: "audit-logs",
     label: "Auditoría",
     singular: "Registro de auditoría",

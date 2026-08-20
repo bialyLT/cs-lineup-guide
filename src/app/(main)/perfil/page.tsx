@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CheckCircle2,
+  Clapperboard,
   Coins,
   Flame,
   MapPin,
@@ -16,11 +18,21 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/page-header";
 import { rankingService } from "@/lib/api/ranking.service";
-import { userService } from "@/lib/api/user.service";
+import { userService, videoRewardService } from "@/lib/api/user.service";
 import { useAuth } from "@/lib/auth/auth-context";
 import { LevelProgressBar } from "@/features/perfil/components/level-progress-bar";
 import { StatCard } from "@/features/perfil/components/stat-card";
+import { RewardedVideoDialog } from "@/components/ads/rewarded-video-dialog";
 import Link from "next/link";
+
+function formatNextClaim(nextClaimAt: string | null): string {
+  if (!nextClaimAt) return "";
+  const ms = new Date(nextClaimAt).getTime() - Date.now();
+  if (ms <= 0) return "ahora";
+  const hours = Math.floor(ms / 3_600_000);
+  const minutes = Math.ceil((ms % 3_600_000) / 60_000);
+  return hours > 0 ? `en ${hours}h ${minutes}min` : `en ${minutes}min`;
+}
 
 export default function PerfilPage() {
   const { user } = useAuth();
@@ -34,6 +46,14 @@ export default function PerfilPage() {
     queryFn: rankingService.global,
     staleTime: 60_000,
   });
+  const { data: reward } = useQuery({
+    queryKey: ["video-reward"],
+    queryFn: videoRewardService.status,
+    staleTime: 60_000,
+    refetchInterval: (query) =>
+      query.state.data && !query.state.data.eligible ? 60_000 : false,
+  });
+  const [rewardOpen, setRewardOpen] = useState(false);
 
   if (isLoading || !me) {
     return (
@@ -104,6 +124,37 @@ export default function PerfilPage() {
 
       <Separator />
 
+      {reward?.enabled ? (
+        <section className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => setRewardOpen(true)}
+            disabled={!reward.eligible}
+            className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/40 p-4 text-left transition-colors hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-foreground text-background">
+              <Clapperboard className="size-5" />
+            </span>
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-sm font-semibold">
+                Ganá {reward.coins} monedas viendo un video
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {reward.eligible
+                  ? "Mirá un video y cobralas al terminar"
+                  : `Disponible de nuevo ${formatNextClaim(reward.nextClaimAt)}`}
+              </span>
+            </div>
+          </button>
+          <p className="px-1 text-xs text-muted-foreground">
+            Se puede reclamar una vez cada {reward.cooldownHours}{" "}
+            {reward.cooldownHours === 1 ? "hora" : "horas"}.
+          </p>
+        </section>
+      ) : null}
+
+      <Separator />
+
       {user?.isStaff ? (
         <Link
           href="/admin"
@@ -149,6 +200,12 @@ export default function PerfilPage() {
           </Link>
         ) : null}
       </section>
+
+      <RewardedVideoDialog
+        open={rewardOpen}
+        status={reward}
+        onClose={() => setRewardOpen(false)}
+      />
     </div>
   );
 }

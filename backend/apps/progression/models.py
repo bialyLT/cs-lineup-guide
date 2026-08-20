@@ -106,6 +106,56 @@ class UserQuestionTypeUnlock(models.Model):
         verbose_name_plural = "desbloqueos de tipo de pregunta"
 
 
+class VideoRewardConfig(models.Model):
+    """Configuración global del reward por video (fila única, editable por admin).
+
+    El usuario ve un video y al terminarlo recibe `coins` monedas. Solo puede
+    reclamar una vez cada `cooldown_hours` horas (límite server-side).
+    """
+
+    coins = models.PositiveIntegerField("monedas por video", default=200)
+    cooldown_hours = models.PositiveIntegerField("cooldown (horas)", default=24)
+    enabled = models.BooleanField("habilitado", default=True)
+    video_url = models.URLField(
+        "video (URL o tag)",
+        blank=True,
+        help_text=(
+            "URL de un video (placeholder) o, más adelante, el tag HTML/JS de "
+            "la red de rewarded video (Playwire)."
+        ),
+    )
+
+    class Meta:
+        verbose_name = "configuración de video con recompensa"
+        verbose_name_plural = "configuración de video con recompensa"
+
+    def __str__(self) -> str:
+        return f"Video · {self.coins} monedas / {self.cooldown_hours}h"
+
+    @classmethod
+    def get_solo(cls) -> "VideoRewardConfig":
+        """Devuelve la fila única, creándola con defaults si no existe."""
+        config, _ = cls.objects.get_or_create(pk=1)
+        return config
+
+
+class VideoRewardClaim(models.Model):
+    """Reclamo de recompensa por video. El cooldown se calcula contra el último."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="video_reward_claims"
+    )
+    claimed_at = models.DateTimeField("reclamado", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-claimed_at"]
+        verbose_name = "reclamo de video"
+        verbose_name_plural = "reclamos de video"
+
+    def __str__(self) -> str:
+        return f"{self.user} · {self.claimed_at}"
+
+
 class QuestionTypeConfig(models.Model):
     """Configuración de desbloqueo de cada tipo de pregunta.
 
