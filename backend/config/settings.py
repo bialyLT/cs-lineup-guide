@@ -259,7 +259,8 @@ R2_MAX_UPLOAD_BYTES = int(os.environ.get("R2_MAX_UPLOAD_BYTES", 10 * 1024 * 1024
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 
 # Sin EMAIL_HOST configurado se usa el backend de consola: el correo (y el
-# código) se imprime en la terminal para desarrollo. Con EMAIL_HOST se usa SMTP.
+# código) se imprime en la terminal para desarrollo. Con EMAIL_HOST se usa SMTP
+# (en producción: Brevo → smtp-relay.brevo.com:587, ver backend/.env.example).
 EMAIL_BACKEND = (
     "django.core.mail.backends.smtp.EmailBackend"
     if os.environ.get("EMAIL_HOST")
@@ -273,6 +274,14 @@ EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "LineupLab <no-reply@lineuplab.app>"
 )
+
+# Con SMTP configurado el remitente debe ser un email verificado en el
+# proveedor (Brevo → Senders): el default no se puede usar para enviar.
+if EMAIL_HOST and DEFAULT_FROM_EMAIL.endswith("no-reply@lineuplab.app>"):
+    raise ImproperlyConfigured(
+        "Con EMAIL_HOST hay que definir DEFAULT_FROM_EMAIL con un remitente "
+        "verificado en Brevo (Senders)."
+    )
 
 # Duración y reintentos del código de verificación de email.
 EMAIL_VERIFICATION_HOURS = int(os.environ.get("EMAIL_VERIFICATION_HOURS", "24"))

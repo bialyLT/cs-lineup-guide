@@ -17,6 +17,17 @@ El backend es Django REST Framework y va a **Railway**; el frontend es Next.js y
    - `DJANGO_CSRF_TRUSTED_ORIGINS` → `https://<backend.up.railway.app>`
    - `GOOGLE_CLIENT_ID` y las variables `R2_*` igual que en desarrollo.
 
+4. **Email de verificación (Brevo)**:
+   1. Creá la cuenta en [Brevo](https://brevo.com) (plan gratis: 300 correos/día).
+   2. En **SMTP & API → SMTP Keys** generá una *SMTP key* (la contraseña del envío).
+   3. En **Senders** agregá el email desde el que vas a enviar y verificalo (te llega un mail de confirmación a esa casilla).
+   4. En Railway:
+      - `EMAIL_HOST=smtp-relay.brevo.com`, `EMAIL_PORT=587`, `EMAIL_USE_TLS=1`
+      - `EMAIL_HOST_USER` = email de tu cuenta Brevo
+      - `EMAIL_HOST_PASSWORD` = la SMTP key generada
+      - `DEFAULT_FROM_EMAIL` = `LineupLab <tu-remitente-verificado@...>`
+      - `FRONTEND_URL` = `https://<frontend.vercel.app>` (para el botón del correo)
+
 ### Frontend → Vercel
 
 1. Importá el repo y dejá el build por defecto (`npm run build`, ya verificado).
