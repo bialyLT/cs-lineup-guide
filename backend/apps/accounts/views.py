@@ -95,13 +95,17 @@ class AddEmailView(APIView):
         email = (request.data.get("email") or "").strip().lower()
         if not email:
             return Response(
-                {"detail": "Indicá tu email."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Indicá tu email.", "code": "email_required"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = request.user
         if User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
             return Response(
-                {"detail": "Ya hay una cuenta con este email."},
+                {
+                    "detail": "Ya hay una cuenta con este email.",
+                    "code": "email_taken",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

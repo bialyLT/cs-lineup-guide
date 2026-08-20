@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth/auth-context";
+import { ApiError } from "@/lib/api/client";
 
 const PENDING_KEY = "ll.pendingVerify";
 
@@ -61,6 +62,7 @@ function VerifyEmailContent() {
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [emailTaken, setEmailTaken] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const autoSubmittedRef = useRef(false);
 
@@ -113,6 +115,7 @@ function VerifyEmailContent() {
   async function handleEmailSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
+    setEmailTaken(false);
     setSubmitting(true);
     try {
       const { devCode: returnedCode } = await attachEmail(email.trim());
@@ -122,7 +125,12 @@ function VerifyEmailContent() {
       setEditingEmail(false);
       toast.success("Enviamos un código de verificación a tu email.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo enviar el código.");
+      if (err instanceof ApiError && err.code === "email_taken") {
+        setEmailTaken(true);
+        setError("Ese email ya está en otra cuenta.");
+      } else {
+        setError(err instanceof Error ? err.message : "No se pudo enviar el código.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -200,6 +208,19 @@ function VerifyEmailContent() {
                   <p className="text-sm text-destructive" role="alert">
                     {error}
                   </p>
+                ) : null}
+
+                {emailTaken ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() =>
+                      router.push(`/login?email=${encodeURIComponent(email.trim())}`)
+                    }
+                  >
+                    ¿Ya tenés cuenta con este email? Iniciá sesión
+                  </Button>
                 ) : null}
 
                 <Button type="submit" className="mt-1 w-full" disabled={submitting}>
