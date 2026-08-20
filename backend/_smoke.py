@@ -19,17 +19,36 @@ def show(label, response):
     except Exception:
         print(response.content[:500])
 
-# 1. Registro
+# 1. Registro con usuario+contraseña → tokens (la cuenta queda sin verificar)
 import time
 
 username = f"smoke_{int(time.time()) % 1000000}"
+email = f"{username}@lineup.com"
 c = Client(HTTP_HOST="localhost")
 r = c.post(
     f"{BASE}/api/auth/register/",
-    data={"username": username, "email": f"{username}@lineup.com", "password": "supersecret1"},
+    data={"username": username, "password": "supersecret1"},
     content_type="application/json",
 )
 show("register", r)
+access = r.json()["access"]
+
+# 1b. Adjuntar email y verificarlo (dev: el código llega en dev_code)
+r = c.post(
+    f"{BASE}/api/auth/me/email/",
+    data={"email": email},
+    content_type="application/json",
+    HTTP_AUTHORIZATION=f"Bearer {access}",
+)
+show("adjuntar email", r)
+dev_code = r.json()["dev_code"]
+r = c.post(
+    f"{BASE}/api/auth/verify-email/",
+    data={"code": dev_code},
+    content_type="application/json",
+    HTTP_AUTHORIZATION=f"Bearer {access}",
+)
+show("verify-email", r)
 access = r.json()["access"]
 
 c = Client(HTTP_HOST="localhost", HTTP_AUTHORIZATION=f"Bearer {access}")

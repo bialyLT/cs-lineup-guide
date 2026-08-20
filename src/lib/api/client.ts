@@ -16,6 +16,7 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     message: string,
+    public readonly code?: string,
   ) {
     super(message);
     this.name = "ApiError";
@@ -37,24 +38,37 @@ function buildUrl(path: string, query?: Query) {
   return url.toString();
 }
 
-async function errorMessage(res: Response, fallback: string): Promise<string> {
+interface ParsedError {
+  message: string;
+  code?: string;
+}
+
+async function parseError(res: Response, fallback: string): Promise<ParsedError> {
   const raw = await res.text().catch(() => undefined);
   if (raw) {
     try {
       const parsed = JSON.parse(raw) as unknown;
-      if (typeof parsed === "string" && parsed) return parsed;
+      if (typeof parsed === "string" && parsed) return { message: parsed };
       if (parsed && typeof parsed === "object") {
-        const value = (parsed as Record<string, unknown>).detail;
-        if (typeof value === "string" && value) return value;
+        const record = parsed as Record<string, unknown>;
+        const code = typeof record.code === "string" ? record.code : undefined;
+        const value = record.detail;
+        if (typeof value === "string" && value) return { message: value, code };
         if (Array.isArray(value) && typeof value[0] === "string" && value[0]) {
-          return value[0];
+          return { message: value[0], code };
         }
+        // Errores de campo: {"email": ["Ya hay una cuenta..."]}
+        const fieldError = Object.values(record).find(
+          (item): item is string[] =>
+            Array.isArray(item) && typeof item[0] === "string" && Boolean(item[0]),
+        );
+        if (fieldError) return { message: fieldError[0], code };
       }
     } catch {
-      return raw.trim() || fallback;
+      return { message: raw.trim() || fallback };
     }
   }
-  return fallback;
+  return { message: fallback };
 }
 
 function headersFor(init: RequestInit): Record<string, string> {
@@ -101,7 +115,8 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    throw new ApiError(res.status, await errorMessage(res, res.statusText));
+    const { message, code } = await parseError(res, res.statusText);
+    throw new ApiError(res.status, message, code);
   }
 
   if (res.status === 204) return undefined as T;
@@ -129,7 +144,8 @@ async function requestForm<T>(path: string, formData: FormData): Promise<T> {
   }
 
   if (!res.ok) {
-    throw new ApiError(res.status, await errorMessage(res, res.statusText));
+    const { message, code } = await parseError(res, res.statusText);
+    throw new ApiError(res.status, message, code);
   }
   return (await res.json()) as T;
 }

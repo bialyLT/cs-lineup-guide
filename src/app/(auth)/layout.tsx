@@ -8,11 +8,13 @@ import { useAuth } from "@/lib/auth/auth-context";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
 
   useEffect(() => {
-    if (status === "authenticated") router.replace("/home");
-  }, [status, router]);
+    if (status === "authenticated") {
+      router.replace(user?.isEmailVerified ? "/home" : "/verify-email");
+    }
+  }, [status, user?.isEmailVerified, router]);
 
   if (status === "loading") {
     return (

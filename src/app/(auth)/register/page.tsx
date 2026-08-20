@@ -20,7 +20,6 @@ export default function RegisterPage() {
   const { register } = useAuth();
 
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -30,8 +29,10 @@ export default function RegisterPage() {
     setError("");
     setSubmitting(true);
     try {
-      await register({ username, email, password });
-      router.replace("/home");
+      await register({ username, password });
+      // La cuenta nace sin email: el siguiente paso es ingresar el correo
+      // y verificarlo (lo maneja /verify-email).
+      router.replace("/verify-email");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo crear la cuenta.");
     } finally {
@@ -44,7 +45,8 @@ export default function RegisterPage() {
       <CardHeader>
         <CardTitle>Crear cuenta</CardTitle>
         <CardDescription>
-          Empezá a desbloquear mapas y lineups de CS2.
+          Empezá con usuario y contraseña. Después vas a verificar tu email
+          para desbloquear mapas y lineups de CS2.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -59,18 +61,6 @@ export default function RegisterPage() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="vos@ejemplo.com"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">

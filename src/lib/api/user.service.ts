@@ -72,9 +72,16 @@ interface ApiMePayload {
 }
 
 export interface AuthResponse {
-  user: User;
+  user: ApiUser;
   refresh: string;
   access: string;
+}
+
+/** Respuesta de adjuntar/reenviar email: el código viene en dev_code (solo dev). */
+export interface EmailStepResponse {
+  detail: string;
+  email: string;
+  dev_code: string | null;
 }
 
 function mapMePayload(raw: ApiMePayload): MePayload {
@@ -156,9 +163,20 @@ export const userService = {
       { credential },
     ),
 
-  register: (body: { username: string; email: string; password: string }) =>
-    apiClient.post<{ refresh: string; access: string; user: ApiUser }>(
-      "/auth/register/",
-      body,
-    ),
+  /** Registro con usuario y contraseña. Devuelve JWT; la cuenta queda sin
+   * email hasta que se adjunta en el paso de verificación. */
+  register: (body: { username: string; password: string }) =>
+    apiClient.post<AuthResponse>("/auth/register/", body),
+
+  /** Adjunta el email a la cuenta y envía el código de verificación. */
+  attachEmail: (email: string) =>
+    apiClient.post<EmailStepResponse>("/auth/me/email/", { email }),
+
+  /** Valida el código y marca el email como verificado. */
+  verifyEmail: (code: string) =>
+    apiClient.post<AuthResponse>("/auth/verify-email/", { code }),
+
+  /** Pide un código nuevo (se reenvía el correo). */
+  resendVerification: () =>
+    apiClient.post<EmailStepResponse>("/auth/verify-email/resend/", {}),
 };

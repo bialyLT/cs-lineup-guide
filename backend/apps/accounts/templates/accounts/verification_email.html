@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+  <body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;">
+            <tr>
+              <td style="padding:32px 32px 8px 32px;">
+                <h1 style="margin:0 0 8px 0;font-size:22px;color:#111827;">Confirmá tu email</h1>
+                <p style="margin:0;font-size:15px;line-height:1.5;color:#374151;">
+                  Hola <strong>{{ user.display_name|default:user.username }}</strong>, falta un paso para activar tu cuenta de LineupLab.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 32px 8px 32px;">
+                <p style="margin:0 0 12px 0;font-size:14px;color:#4b5563;">Tu código de verificación:</p>
+                <div style="display:inline-block;background:#eef2ff;border:1px dashed #6366f1;border-radius:12px;padding:16px 28px;font-size:34px;font-weight:700;letter-spacing:10px;color:#4338ca;text-align:center;">
+                  {{ code }}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px 8px 32px;">
+                <p style="margin:0 0 14px 0;font-size:14px;color:#4b5563;">
+                  ¿O preferís un solo clic? Tocá el botón y tu cuenta queda activa al instante:
+                </p>
+                <a href="{{ link }}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;border-radius:10px;padding:14px 28px;">
+                  Verificar mi email
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px 32px 32px;">
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#6b7280;">
+                  El código vence en 24 horas. Si no creaste esta cuenta, podés ignorar este correo.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

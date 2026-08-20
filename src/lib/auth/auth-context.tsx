@@ -11,28 +11,32 @@ import {
 
 import { apiClient } from "@/lib/api/client";
 import { mapApiUser, type ApiUser } from "@/lib/api/mappers";
+import { userService } from "@/lib/api/user.service";
 import type { User } from "@/types";
 
 import { tokenStore } from "./token-store";
 
-interface AuthResponse {
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+
+interface AuthResponseRaw {
   user: ApiUser;
   refresh: string;
   access: string;
 }
 
-export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
-
 interface AuthContextValue {
   user: User | null;
   status: AuthStatus;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
-  register: (body: {
-    username: string;
-    email: string;
-    password: string;
-  }) => Promise<void>;
+  login: (emailOrUsername: string, password: string) => Promise<User>;
+  loginWithGoogle: (credential: string) => Promise<User>;
+  /** Crea la cuenta con usuario y contraseña. Devuelve el usuario (sin verificar). */
+  register: (body: { username: string; password: string }) => Promise<User>;
+  /** Adjunta el email a la cuenta y envía el código. Devuelve el dev_code. */
+  attachEmail: (email: string) => Promise<{ devCode: string | null }>;
+  /** Valida el código y recién acá habilita el acceso. */
+  verifyEmail: (code: string) => Promise<void>;
+  /** Reenvía el código de verificación. Devuelve el dev_code. */
+  resendVerification: () => Promise<{ devCode: string | null }>;
   logout: () => void;
 }
 
@@ -68,39 +72,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const storeSession = useCallback((data: AuthResponse) => {
+  const storeSession = useCallback((data: AuthResponseRaw) => {
     tokenStore.setTokens(data.access, data.refresh);
     setUser(mapApiUser(data.user));
     setStatus("authenticated");
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      const data = await apiClient.post<AuthResponse>("/auth/login/", {
-        email,
+    async (emailOrUsername: string, password: string) => {
+      const data = await apiClient.post<AuthResponseRaw>("/auth/login/", {
+        email: emailOrUsername,
         password,
       });
       storeSession(data);
+      return mapApiUser(data.user);
     },
     [storeSession],
   );
 
   const loginWithGoogle = useCallback(
     async (credential: string) => {
-      const data = await apiClient.post<AuthResponse>("/auth/google/", {
+      const data = await apiClient.post<AuthResponseRaw>("/auth/google/", {
         credential,
       });
       storeSession(data);
+      return mapApiUser(data.user);
     },
     [storeSession],
   );
 
   const register = useCallback(
-    async (body: { username: string; email: string; password: string }) => {
-      const data = await apiClient.post<AuthResponse>("/auth/register/", body);
+    async (body: { username: string; password: string }) => {
+      const data = await userService.register(body);
+      storeSession(data);
+      return mapApiUser(data.user);
+    },
+    [storeSession],
+  );
+
+  const attachEmail = useCallback(
+    async (email: string) => {
+      const data = await userService.attachEmail(email);
+      return { devCode: data.dev_code };
+    },
+    [],
+  );
+
+  const verifyEmail = useCallback(
+    async (code: string) => {
+      const data = await userService.verifyEmail(code);
       storeSession(data);
     },
     [storeSession],
+  );
+
+  const resendVerification = useCallback(
+    async () => {
+      const data = await userService.resendVerification();
+      return { devCode: data.dev_code };
+    },
+    [],
   );
 
   const logout = useCallback(() => {
@@ -111,7 +142,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, status, login, loginWithGoogle, register, logout }}
+      value={{
+        user,
+        status,
+        login,
+        loginWithGoogle,
+        register,
+        attachEmail,
+        verifyEmail,
+        resendVerification,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

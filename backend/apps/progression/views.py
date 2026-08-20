@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -68,7 +69,14 @@ def me_payload(user) -> dict:
 
 
 class MeView(APIView):
-    """GET /api/me/ → usuario + contadores + desbloqueos."""
+    """GET /api/me/ → usuario + contadores + desbloqueos.
+
+    Accesible para usuarios sin verificar (solo IsAuthenticated) para que la
+    app sepa que la cuenta está pendiente; el resto de endpoints exigen
+    email verificado (permiso por defecto IsVerifiedUser).
+    """
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(me_payload(request.user))

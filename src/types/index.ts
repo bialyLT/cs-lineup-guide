@@ -35,6 +35,8 @@ export interface User {
   email?: string;
   /** true si el usuario es staff/superusuario (acceso al panel admin). */
   isStaff?: boolean;
+  /** true si el usuario confirmó su email (requerido para entrar). */
+  isEmailVerified?: boolean;
 }
 
 /** Conteos de desbloqueo de un mapa (lugares y lineups). */

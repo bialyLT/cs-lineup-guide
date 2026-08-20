@@ -25,15 +25,13 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const goHome = () => router.replace("/home");
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      await login(email, password);
-      goHome();
+      const user = await login(email, password);
+      router.replace(user.isEmailVerified ? "/home" : "/verify-email");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo iniciar sesión.");
     } finally {
@@ -50,8 +48,8 @@ export default function LoginPage() {
       return;
     }
     try {
-      await loginWithGoogle(response.credential);
-      goHome();
+      const user = await loginWithGoogle(response.credential);
+      router.replace(user.isEmailVerified ? "/home" : "/verify-email");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo iniciar sesión con Google.");
     }
@@ -74,18 +72,18 @@ export default function LoginPage() {
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
-          o con email
+          o con usuario
           <span className="h-px flex-1 bg-border" />
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email o usuario</Label>
             <Input
               id="email"
-              type="email"
+              type="text"
               placeholder="vos@ejemplo.com"
-              autoComplete="email"
+              autoComplete="username"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}

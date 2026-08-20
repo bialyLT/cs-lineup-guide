@@ -12,17 +12,21 @@ import { userService } from "@/lib/api/user.service";
 export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const { data: me } = useQuery({
     queryKey: ["me"],
     queryFn: userService.me,
-    enabled: status === "authenticated",
+    enabled: status === "authenticated" && Boolean(user?.isEmailVerified),
     staleTime: 0,
   });
 
+  // Sin sesión o con email sin verificar, no hay acceso a la app.
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login");
-  }, [status, router]);
+    else if (status === "authenticated" && user && !user.isEmailVerified) {
+      router.replace("/verify-email");
+    }
+  }, [status, user, router]);
 
   // Sin lugares iniciales elegidos, lo primero es el onboarding.
   useEffect(() => {
@@ -36,7 +40,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     }
   }, [status, me, pathname, router]);
 
-  if (status === "loading" || status === "unauthenticated") {
+  if (
+    status === "loading" ||
+    status === "unauthenticated" ||
+    (status === "authenticated" && user && !user.isEmailVerified)
+  ) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <span className="text-sm text-muted-foreground">Cargando…</span>

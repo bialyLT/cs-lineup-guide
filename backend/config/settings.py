@@ -186,7 +186,9 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
+        # Los datos de la app exigen email verificado (cuentas de Google lo
+        # tienen; las de email/contraseña recién al completar la verificación).
+        "apps.accounts.permissions.IsVerifiedUser",
     ),
 }
 
@@ -222,3 +224,30 @@ R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL", "").rstrip("/")
 
 # Tamaño máximo de imagen subida al bucket (10 MB).
 R2_MAX_UPLOAD_BYTES = int(os.environ.get("R2_MAX_UPLOAD_BYTES", 10 * 1024 * 1024))
+
+# Email (verificación de cuentas) -----------------------------------------
+
+# URL pública del frontend, usada en el botón "Verificar mi email".
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+
+# Sin EMAIL_HOST configurado se usa el backend de consola: el correo (y el
+# código) se imprime en la terminal para desarrollo. Con EMAIL_HOST se usa SMTP.
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend"
+    if os.environ.get("EMAIL_HOST")
+    else "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "LineupLab <no-reply@lineuplab.app>"
+)
+
+# Duración y reintentos del código de verificación de email.
+EMAIL_VERIFICATION_HOURS = int(os.environ.get("EMAIL_VERIFICATION_HOURS", "24"))
+EMAIL_VERIFICATION_MAX_ATTEMPTS = int(
+    os.environ.get("EMAIL_VERIFICATION_MAX_ATTEMPTS", "5")
+)

@@ -4,7 +4,9 @@ export interface ApiUser {
   id: number | string;
   username: string;
   display_name?: string;
+  email?: string;
   is_staff?: boolean;
+  is_email_verified?: boolean;
 }
 
 export interface ApiProgression {
@@ -19,7 +21,9 @@ export function mapApiUser(raw: ApiUser): User {
     id: String(raw.id),
     username: raw.username,
     displayName: raw.display_name,
+    email: raw.email,
     isStaff: Boolean(raw.is_staff),
+    isEmailVerified: Boolean(raw.is_email_verified),
   };
 }
 
