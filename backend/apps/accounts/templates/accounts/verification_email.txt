@@ -1,6 +1,6 @@
 Hola {{ user.display_name|default:user.username }},
 
-Confirmá tu email para activar tu cuenta de LineupLab.
+Confirmá tu email para activar tu cuenta de Smokeame Ventana.
 
 Tu código de verificación es:
 
@@ -12,4 +12,4 @@ También podés verificar tu email con un solo clic:
 
 Este código vence en 24 horas. Si no creaste una cuenta, podés ignorar este correo.
 
-— Equipo LineupLab
+— Equipo Smokeame Ventana

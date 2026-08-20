@@ -1,5 +1,5 @@
 /**
- * Tipos provisionales del dominio de LineupLab.
+ * Tipos provisionales del dominio de Smokeame Ventana.
  *
  * Son la base para negociar el contrato con los serializers de Django.
  * Se espera que cambien al definir la API — mantenerlos simples y agnósticos.

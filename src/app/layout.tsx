@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "LineupLab",
-    template: "%s · LineupLab",
+    default: "Smokeame Ventana",
+    template: "%s · Smokeame Ventana",
   },
   description:
     "Aprende lineups de Counter-Strike 2 con quizzes interactivos.",
-  applicationName: "LineupLab",
-  authors: [{ name: "LineupLab" }],
+  applicationName: "Smokeame Ventana",
+  authors: [{ name: "Smokeame Ventana" }],
 };
 
 export const viewport: Viewport = {

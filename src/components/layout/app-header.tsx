@@ -21,7 +21,7 @@ export function AppHeader({ className }: { className?: string }) {
           <div className="flex size-6 items-center justify-center rounded-md bg-foreground text-background">
             <Crosshair className="size-4" strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-semibold tracking-tight">LineupLab</span>
+          <span className="text-sm font-semibold tracking-tight">Smokeame Ventana</span>
         </div>
         <Button
           variant="ghost"

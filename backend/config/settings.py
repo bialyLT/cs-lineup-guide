@@ -1,5 +1,5 @@
 """
-Django settings for LineupLab.
+Django settings for Smokeame Ventana.
 
 Configuración por entorno:
 
@@ -279,13 +279,13 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL", "LineupLab <no-reply@lineuplab.app>"
+    "DEFAULT_FROM_EMAIL", "Smokeame Ventana <no-reply@smokeameventana.app>"
 )
 
 # Con envío real configurado (API de Brevo o SMTP) el remitente debe ser un
 # email verificado en Brevo (Senders): el default no se puede usar para enviar.
 if (ANYMAIL_BREVO_API_KEY or EMAIL_HOST) and DEFAULT_FROM_EMAIL.endswith(
-    "no-reply@lineuplab.app>"
+    "no-reply@smokeameventana.app>"
 ):
     raise ImproperlyConfigured(
         "Con envío configurado hay que definir DEFAULT_FROM_EMAIL con un "

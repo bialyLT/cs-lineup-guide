@@ -73,7 +73,7 @@ def send_verification_email(user: User) -> EmailVerification:
         )
 
     link = _verification_link(user, verification.code)
-    subject = "Confirmá tu email en LineupLab"
+    subject = "Confirmá tu email en Smokeame Ventana"
     message = render_to_string(
         "accounts/verification_email.txt",
         {"code": verification.code, "link": link, "user": user},

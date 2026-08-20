@@ -173,7 +173,7 @@ function VerifyEmailContent() {
         <div className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">
           <Crosshair className="size-5" strokeWidth={2.5} />
         </div>
-        <span className="text-lg font-semibold tracking-tight">LineupLab</span>
+        <span className="text-lg font-semibold tracking-tight">Smokeame Ventana</span>
       </div>
       <div className="w-full max-w-sm">
         <Card>

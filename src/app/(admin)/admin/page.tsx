@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold tracking-tight">Panel de administración</h1>
         <p className="text-sm text-muted-foreground">
-          Gestioná el contenido y los usuarios de LineupLab.
+          Gestioná el contenido y los usuarios de Smokeame Ventana.
         </p>
       </div>
 
