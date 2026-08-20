@@ -20,7 +20,7 @@ import { ReferencePoint } from "@/features/quiz/components/reference-point";
 const LETTERS = ["A", "B", "C", "D"];
 // Espejo de apps/progression/constants.py.
 const XP_PER_CORRECT = 25;
-const COINS_PER_CORRECT = 10;
+const COINS_PER_CORRECT = 30;
 // Tipos donde conviene mostrar el título del lineup como referencia.
 const LINEUP_TITLE_TYPES = ["reference", "key_combo", "player_position"];
 

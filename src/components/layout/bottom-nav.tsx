@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Crosshair, Home, Map as MapIcon, Trophy, User } from "lucide-react";
+import { Gamepad2, Home, Map as MapIcon, Trophy, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/home", label: "Inicio", icon: Home },
-  { href: "/quiz/crear", label: "Quiz", icon: Crosshair },
   { href: "/mapas", label: "Mapas", icon: MapIcon },
+  { href: "/quiz/crear", label: "PLAY", icon: Gamepad2 },
   { href: "/ranking", label: "Ranking", icon: Trophy },
   { href: "/perfil", label: "Perfil", icon: User },
 ];

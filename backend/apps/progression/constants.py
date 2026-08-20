@@ -23,9 +23,11 @@ COIN_COST_PLACE_STEP = 30
 COIN_COST_LINEUP = 60
 COIN_COST_QUESTION_TYPE = 40
 
-# Recompensas por respuesta correcta (progreso por contadores).
+# Recompensas por respuesta correcta (progreso por contadores). El quiz por
+# defecto tiene 5 preguntas: un quiz perfecto da 150 monedas, suficiente para
+# desbloquear 1-2 lugares (los ítems más caros del juego).
 XP_PER_CORRECT = 25
-COINS_PER_CORRECT = 10
+COINS_PER_CORRECT = 30
 
 # Si pasan más de estas horas sin responder correcto, la racha se reinicia.
 STREAK_WINDOW_HOURS = 24
