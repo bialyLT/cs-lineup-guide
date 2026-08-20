@@ -101,6 +101,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "anymail",
     # Apps del dominio
     "apps.accounts",
     "apps.maps",
@@ -258,14 +259,19 @@ R2_MAX_UPLOAD_BYTES = int(os.environ.get("R2_MAX_UPLOAD_BYTES", 10 * 1024 * 1024
 # URL pública del frontend, usada en el botón "Verificar mi email".
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 
-# Sin EMAIL_HOST configurado se usa el backend de consola: el correo (y el
-# código) se imprime en la terminal para desarrollo. Con EMAIL_HOST se usa SMTP
-# (en producción: Brevo → smtp-relay.brevo.com:587, ver backend/.env.example).
-EMAIL_BACKEND = (
-    "django.core.mail.backends.smtp.EmailBackend"
-    if os.environ.get("EMAIL_HOST")
-    else "django.core.mail.backends.console.EmailBackend"
-)
+# Railway (planes gratis/Hobby) BLOQUEA el SMTP saliente (25/465/587), así que
+# en producción hay que enviar por la API HTTPS de Brevo (puerto 443).
+# ANYMAIL_BREVO_API_KEY = API key v3 de Brevo (empieza con xkeysib-).
+# Sin key y sin EMAIL_HOST se usa el backend de consola (desarrollo).
+ANYMAIL_BREVO_API_KEY = os.environ.get("ANYMAIL_BREVO_API_KEY", "")
+
+if ANYMAIL_BREVO_API_KEY:
+    EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+elif os.environ.get("EMAIL_HOST"):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
@@ -275,12 +281,14 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "LineupLab <no-reply@lineuplab.app>"
 )
 
-# Con SMTP configurado el remitente debe ser un email verificado en el
-# proveedor (Brevo → Senders): el default no se puede usar para enviar.
-if EMAIL_HOST and DEFAULT_FROM_EMAIL.endswith("no-reply@lineuplab.app>"):
+# Con envío real configurado (API de Brevo o SMTP) el remitente debe ser un
+# email verificado en Brevo (Senders): el default no se puede usar para enviar.
+if (ANYMAIL_BREVO_API_KEY or EMAIL_HOST) and DEFAULT_FROM_EMAIL.endswith(
+    "no-reply@lineuplab.app>"
+):
     raise ImproperlyConfigured(
-        "Con EMAIL_HOST hay que definir DEFAULT_FROM_EMAIL con un remitente "
-        "verificado en Brevo (Senders)."
+        "Con envío configurado hay que definir DEFAULT_FROM_EMAIL con un "
+        "remitente verificado en Brevo (Senders)."
     )
 
 # Duración y reintentos del código de verificación de email.
