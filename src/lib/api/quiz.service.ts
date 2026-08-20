@@ -58,6 +58,8 @@ export function mapApiQuiz(raw: ApiQuiz): Quiz {
 
 export interface AnswerResponse {
   correct: boolean;
+  /** Id de la opción correcta (para mostrarla al fallar). */
+  correctOptionId?: string;
   xp: number;
   coins: number;
   streak: number;
@@ -110,6 +112,7 @@ export const quizService = {
     apiClient
       .post<{
         correct: boolean;
+        correct_option_id?: number | null;
         xp: number;
         coins: number;
         streak: number;
@@ -117,6 +120,8 @@ export const quizService = {
       }>(`/questions/${questionId}/answer/`, { option_id: Number(optionId) })
       .then((raw) => ({
         correct: raw.correct,
+        correctOptionId:
+          raw.correct_option_id != null ? String(raw.correct_option_id) : undefined,
         xp: raw.xp,
         coins: raw.coins,
         streak: raw.streak,

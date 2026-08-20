@@ -94,6 +94,26 @@ export default function QuizPage() {
     router.replace("/home");
   }
 
+  // Durante el feedback se destaca la opción correcta aunque el usuario haya fallado.
+  function optionState(
+    optionId: string,
+  ): "idle" | "selected" | "correct" | "incorrect" {
+    if (phase === "feedback" && result) {
+      if (result.correctOptionId && optionId === result.correctOptionId) {
+        return "correct";
+      }
+      if (optionId === selectedId) return "incorrect";
+      return "idle";
+    }
+    return optionId === selectedId ? "selected" : "idle";
+  }
+
+  // Texto de la respuesta correcta (preguntas con opciones de texto).
+  const correctAnswerText =
+    phase === "feedback" && result?.correctOptionId
+      ? question.options.find((o) => o.id === result.correctOptionId)?.text
+      : undefined;
+
   if (phase === "done") {
     return (
       <div className="-mx-4 -mt-8 flex min-h-dvh flex-col gap-5 px-4">
@@ -137,8 +157,8 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="-mx-4 -mt-8 flex min-h-dvh flex-col gap-5 px-4">
-      <div className="-mx-4">
+    <div className="-mx-4 -mt-8 flex min-h-dvh flex-col gap-3 px-4">
+      <div className="-mx-4 shrink-0">
         <QuizHeader current={index + 1} total={total} title={quiz.title} />
         <QuizProgress value={((index + 1) / total) * 100} className="mx-4" />
       </div>
@@ -150,7 +170,7 @@ export default function QuizPage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="flex flex-1 flex-col gap-5"
+          className="flex min-h-0 flex-1 flex-col gap-3"
         >
           <QuestionCard
             prompt={question.prompt}
@@ -168,8 +188,9 @@ export default function QuizPage() {
               message={
                 result.correct
                   ? `¡Correcto! +${XP_PER_CORRECT} XP`
-                  : "Incorrecto, seguí practicando"
+                  : "Incorrecto"
               }
+              correctAnswer={correctAnswerText}
               streak={result.streak}
             />
           ) : null}
@@ -184,21 +205,11 @@ export default function QuizPage() {
             <QuestionImage src={question.imageUrl} aspectRatio="aspect-[4/5]">
               {question.options.map((option, i) => {
                 if (!option.position) return null;
-                let state: "idle" | "selected" | "correct" | "incorrect" = "idle";
-                if (phase === "feedback") {
-                  state = option.id === selectedId
-                    ? result?.correct
-                      ? "correct"
-                      : "incorrect"
-                    : "idle";
-                } else if (option.id === selectedId) {
-                  state = "selected";
-                }
                 return (
                   <ReferencePoint
                     key={option.id}
                     position={option.position}
-                    state={state}
+                    state={optionState(option.id)}
                     label={option.text || String(i + 1)}
                     onClick={phase === "answering" ? () => setSelectedId(option.id) : undefined}
                   />
@@ -206,32 +217,20 @@ export default function QuizPage() {
               })}
             </QuestionImage>
           ) : (
-            <div className="flex flex-col gap-2.5">
-              {question.options.map((option, i) => {
-                let state: "idle" | "selected" | "correct" | "incorrect" = "idle";
-                if (phase === "feedback") {
-                  state = option.id === selectedId
-                    ? result?.correct
-                      ? "correct"
-                      : "incorrect"
-                    : "idle";
-                } else if (option.id === selectedId) {
-                  state = "selected";
-                }
-                return (
-                  <AnswerOption
-                    key={option.id}
-                    text={option.text ?? ""}
-                    letter={LETTERS[i] ?? String(i + 1)}
-                    state={state}
-                    onClick={() => setSelectedId(option.id)}
-                  />
-                );
-              })}
+            <div className="flex min-h-0 flex-1 flex-col justify-center gap-2.5">
+              {question.options.map((option, i) => (
+                <AnswerOption
+                  key={option.id}
+                  text={option.text ?? ""}
+                  letter={LETTERS[i] ?? String(i + 1)}
+                  state={optionState(option.id)}
+                  onClick={() => setSelectedId(option.id)}
+                />
+              ))}
             </div>
           )}
 
-          <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+          <div className="mt-auto flex shrink-0 items-center justify-between gap-3 pt-1">
             <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium">
               <Flame className="size-4 text-warning" />
               <span className="tabular-nums">{result?.streak ?? 0}</span> racha

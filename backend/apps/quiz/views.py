@@ -126,9 +126,11 @@ class AnswerQuestionView(APIView):
             )
 
         progression = record_answer(request.user, correct=option.is_correct)
+        correct_option = Option.objects.filter(question=question, is_correct=True).first()
         return Response(
             {
                 "correct": option.is_correct,
+                "correct_option_id": correct_option.id if correct_option else None,
                 "xp": progression.xp,
                 "coins": progression.coins,
                 "streak": progression.streak,

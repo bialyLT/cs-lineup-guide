@@ -30,30 +30,39 @@ export function QuestionImage({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-xl ring-1 ring-foreground/10",
-        !src && aspectRatio,
+        "flex min-h-0 flex-1 items-center justify-center overflow-hidden",
         className,
       )}
     >
       {src ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={src}
-          alt={alt}
-          className="block h-auto w-full"
-        />
+        <div className="relative max-w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={alt}
+            className="block h-auto max-h-[38vh] w-auto max-w-full"
+          />
+          {children}
+        </div>
       ) : (
         <div
-          className="absolute inset-0 flex items-center justify-center bg-muted"
-          aria-hidden
+          className={cn(
+            "relative w-full overflow-hidden rounded-xl ring-1 ring-foreground/10",
+            aspectRatio,
+          )}
         >
-          <div className="absolute inset-0 opacity-[0.55] [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:calc(100%/8)_calc(100%/6)]" />
-          <span className="relative text-sm font-medium uppercase tracking-widest text-muted-foreground">
-            {placeholderLabel ?? "Mapa"}
-          </span>
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-muted"
+            aria-hidden
+          >
+            <div className="absolute inset-0 opacity-[0.55] [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:calc(100%/8)_calc(100%/6)]" />
+            <span className="relative text-sm font-medium uppercase tracking-widest text-muted-foreground">
+              {placeholderLabel ?? "Mapa"}
+            </span>
+          </div>
+          {children}
         </div>
       )}
-      {children}
     </div>
   );
 }

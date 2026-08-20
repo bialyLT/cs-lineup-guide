@@ -14,8 +14,8 @@ export function QuestionCard({ prompt, helperText, lineupTitle, className }: Que
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {lineupTitle ? (
-        <span className="flex w-fit items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-          <Crosshair className="size-3.5" />
+        <span className="flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
+          <Crosshair className="size-4" />
           {lineupTitle}
         </span>
       ) : null}
