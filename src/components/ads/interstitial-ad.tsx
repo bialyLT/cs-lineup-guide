@@ -8,7 +8,18 @@ import { Button } from "@/components/ui/button";
 
 // Tag de la red publicitaria (Adsterra, PropellerAds, etc.). Mientras esté
 // vacío se muestra un placeholder para probar el flujo.
-const INTERSTITIAL_AD_HTML = "";
+const INTERSTITIAL_AD_HTML = `
+<script>
+  atOptions = {
+    'key' : '4aac2af46e20bda732af126b5582e73c',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/4aac2af46e20bda732af126b5582e73c/invoke.js"></script>
+`;
 
 interface InterstitialAdProps {
   open: boolean;
@@ -74,7 +85,7 @@ export function InterstitialAd({ open, ready, onClose }: InterstitialAdProps) {
                   <iframe
                     title="Publicidad"
                     srcDoc={INTERSTITIAL_AD_HTML}
-                    sandbox="allow-scripts allow-same-origin allow-top-navigation-by-user-activation"
+                    sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
                     className="size-full min-h-64 border-0"
                   />
                 ) : (
