@@ -21,6 +21,9 @@ const INTERSTITIAL_AD_HTML = `
 <script src="https://www.highperformanceformat.com/4aac2af46e20bda732af126b5582e73c/invoke.js"></script>
 `;
 
+// Segundos que hay que esperar antes de poder cerrar la publicidad.
+const CLOSE_DELAY_SECONDS = 5;
+
 interface InterstitialAdProps {
   open: boolean;
   ready: boolean;
@@ -30,17 +33,28 @@ interface InterstitialAdProps {
 export function InterstitialAd({ open, ready, onClose }: InterstitialAdProps) {
   const [phase, setPhase] = useState<"ad" | "waiting">("ad");
   const [prevOpen, setPrevOpen] = useState(open);
+  const [secondsLeft, setSecondsLeft] = useState(CLOSE_DELAY_SECONDS);
 
   if (open !== prevOpen) {
     setPrevOpen(open);
-    if (open) setPhase("ad");
+    if (open) {
+      setPhase("ad");
+      setSecondsLeft(CLOSE_DELAY_SECONDS);
+    }
   }
 
   useEffect(() => {
     if (phase === "waiting" && ready) onClose();
   }, [phase, ready, onClose]);
 
+  useEffect(() => {
+    if (!open || secondsLeft <= 0) return;
+    const id = setTimeout(() => setSecondsLeft((value) => value - 1), 1000);
+    return () => clearTimeout(id);
+  }, [open, secondsLeft]);
+
   function handleClose() {
+    if (secondsLeft > 0) return;
     if (ready) onClose();
     else setPhase("waiting");
   }
@@ -72,10 +86,15 @@ export function InterstitialAd({ open, ready, onClose }: InterstitialAdProps) {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Cerrar publicidad"
+                aria-label={
+                  secondsLeft > 0
+                    ? `Cerrar publicidad en ${secondsLeft} segundos`
+                    : "Cerrar publicidad"
+                }
+                disabled={secondsLeft > 0}
                 onClick={handleClose}
               >
-                <X />
+                {secondsLeft > 0 ? secondsLeft : <X />}
               </Button>
             </div>
 
