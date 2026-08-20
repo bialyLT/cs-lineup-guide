@@ -85,7 +85,7 @@ export function InterstitialAd({ open, ready, onClose }: InterstitialAdProps) {
                   <iframe
                     title="Publicidad"
                     srcDoc={INTERSTITIAL_AD_HTML}
-                    sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                     className="size-full min-h-64 border-0"
                   />
                 ) : (
