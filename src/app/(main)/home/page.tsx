@@ -40,8 +40,18 @@ export default function HomePage() {
   const level = progression ? getLevelProgress(progression.xp).level : 1;
   const name = user?.displayName || user?.username || me?.user.username || "invitado";
 
-  const lockedMaps = maps.filter((map) => !map.unlocked && !map.isFree);
   const availableCount = maps.filter((map) => map.unlocked || map.isFree).length;
+  const upcomingNames = maps
+    .map((map) => map.name)
+    .filter((name) => !["Mirage", "Dust II"].includes(name));
+  const upcomingText =
+    upcomingNames.length > 1
+      ? `Próximamente se agregarán ${upcomingNames.slice(0, -1).join(", ")} y ${
+          upcomingNames[upcomingNames.length - 1]
+        }.`
+      : upcomingNames.length === 1
+        ? `Próximamente se agregarán ${upcomingNames[0]}.`
+        : "";
 
   return (
     <motion.div
@@ -141,16 +151,12 @@ export default function HomePage() {
         </div>
       </motion.div>
 
-      {lockedMaps.length > 0 ? (
+      {upcomingText ? (
         <motion.div variants={item}>
           <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-4">
             <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <p className="text-sm leading-relaxed text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {lockedMaps.slice(0, 3).map((map) => map.name).join(", ")}
-                {lockedMaps.length > 3 ? " y más" : ""}
-              </span>{" "}
-              se desbloquean con monedas. Ganá monedas manteniendo tu racha en los quizzes.
+              <span className="font-medium text-foreground">{upcomingText}</span>
             </p>
             <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
           </div>
