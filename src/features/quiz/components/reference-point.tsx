@@ -17,7 +17,7 @@ interface ReferencePointProps {
 }
 
 const stateStyles: Record<PointState, string> = {
-  idle: "border-foreground/50 bg-background/80 text-foreground",
+  idle: "border-foreground bg-background text-foreground",
   selected: "border-primary bg-primary text-primary-foreground scale-110",
   correct: "border-success bg-success text-success-foreground scale-110",
   incorrect: "border-destructive bg-destructive text-destructive-foreground scale-110",

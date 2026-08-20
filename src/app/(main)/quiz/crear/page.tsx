@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowRight, Crosshair, LoaderCircle, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { InterstitialAd } from "@/components/ads/interstitial-ad";
 import { PageHeader } from "@/components/layout/page-header";
 import { mapService } from "@/lib/api/map.service";
 import { quizService } from "@/lib/api/quiz.service";
@@ -77,6 +78,7 @@ export default function QuizCreatePage() {
   const [questionType, setQuestionType] = useState("");
   const [count, setCount] = useState(0);
   const [error, setError] = useState("");
+  const [adVisible, setAdVisible] = useState(false);
 
   const accessible = useMemo(
     () => maps.filter((map) => map.unlocked || map.isFree),
@@ -247,12 +249,17 @@ export default function QuizCreatePage() {
       }),
     onSuccess: (quiz) => {
       quizSession.save(quiz);
-      router.push("/quiz");
     },
     onError: (err) => {
       setError(err instanceof Error ? err.message : "No se pudo crear el quiz.");
+      setAdVisible(false);
     },
   });
+
+  // Se avanza al quiz recién cuando la publicidad está cerrada y la creación terminó.
+  useEffect(() => {
+    if (generate.isSuccess && !adVisible) router.push("/quiz");
+  }, [generate.isSuccess, adVisible, router]);
 
   const availableTypes = me?.unlocked.questionTypes ?? [];
   const typeOptions = ["", ...availableTypes];
@@ -538,6 +545,7 @@ export default function QuizCreatePage() {
           disabled={toggled.length === 0 || max === 0 || generate.isPending}
           onClick={() => {
             setError("");
+            setAdVisible(true);
             generate.mutate(toggled);
           }}
         >
@@ -554,6 +562,12 @@ export default function QuizCreatePage() {
           )}
         </Button>
       </div>
+
+      <InterstitialAd
+        open={adVisible}
+        ready={generate.isSuccess}
+        onClose={() => setAdVisible(false)}
+      />
     </div>
   );
 }
