@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { CheckCircle2, Flame, LoaderCircle, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { InterstitialAd } from "@/components/ads/interstitial-ad";
 import { quizService, type AnswerResponse } from "@/lib/api/quiz.service";
 import { quizSession } from "@/lib/quiz-session";
 import { AnswerOption } from "@/features/quiz/components/answer-option";
@@ -37,6 +38,7 @@ export default function QuizPage() {
   const [earnedCoins, setEarnedCoins] = useState(0);
   const [result, setResult] = useState<AnswerResponse | null>(null);
   const [error, setError] = useState("");
+  const [pendingAction, setPendingAction] = useState<"restart" | "home" | null>(null);
 
   useEffect(() => {
     if (!quiz) router.replace("/quiz/crear");
@@ -88,18 +90,28 @@ export default function QuizPage() {
   }
 
   function handleRestart() {
-    setIndex(0);
-    setSelectedId(null);
-    setResult(null);
-    setCorrectCount(0);
-    setEarnedXp(0);
-    setEarnedCoins(0);
-    setError("");
-    setPhase("answering");
+    setPendingAction("restart");
   }
 
   function handleFinish() {
-    router.replace("/home");
+    setPendingAction("home");
+  }
+
+  function handleAdClose() {
+    const action = pendingAction;
+    setPendingAction(null);
+    if (action === "home") {
+      router.replace("/home");
+    } else if (action === "restart") {
+      setIndex(0);
+      setSelectedId(null);
+      setResult(null);
+      setCorrectCount(0);
+      setEarnedXp(0);
+      setEarnedCoins(0);
+      setError("");
+      setPhase("answering");
+    }
   }
 
   // Durante el feedback se destaca la opción correcta aunque el usuario haya fallado.
@@ -160,9 +172,15 @@ export default function QuizPage() {
             </Button>
           </div>
         </motion.div>
+
+        <InterstitialAd
+          open={pendingAction !== null}
+          ready
+          onClose={handleAdClose}
+        />
       </div>
-    );
-  }
+  );
+}
 
   return (
     <div className="-mx-4 -mt-8 flex min-h-dvh flex-col gap-3 px-4">
