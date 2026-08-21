@@ -8,6 +8,7 @@ from apps.progression.services import (
     get_or_create_progression,
     get_unlocked_map_slugs,
     record_answer,
+    record_quiz_completion,
 )
 from apps.maps.models import Map
 
@@ -168,6 +169,18 @@ class AnswerQuestionView(APIView):
                 option=option,
                 is_correct=option.is_correct,
             )
+
+            # ¿Quiz completo? (todas sus preguntas ya respondidas). La racha
+            # solo se actualiza aquí, según si el quiz fue 100% correcto.
+            total = quiz.quiz_questions.count()
+            answered = QuizAnswer.objects.filter(quiz_question__quiz=quiz).count()
+            if total > 0 and answered >= total:
+                all_correct = not QuizAnswer.objects.filter(
+                    quiz_question__quiz=quiz, is_correct=False
+                ).exists()
+                progression = record_quiz_completion(
+                    request.user, all_correct=all_correct, progression=progression
+                )
 
         correct_option = Option.objects.filter(
             question=quiz_question.question, is_correct=True

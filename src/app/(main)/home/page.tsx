@@ -74,7 +74,7 @@ export default function HomePage() {
           <motion.div variants={item} className="flex flex-wrap items-center gap-2">
             <StatPill
               icon={<Flame className="text-warning" />}
-              label="Racha de respuestas correctas"
+              label="Racha de quizes perfectos"
               value={progression.streak}
             />
             <StatPill

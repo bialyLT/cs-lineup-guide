@@ -428,35 +428,44 @@ def available_questions(
 # ----- Respuestas (solo contadores) ----------------------------------------
 
 def record_answer(user, correct: bool, progression: Progression | None = None) -> Progression:
+    """Premia con XP/monedas cada respuesta correcta (una vez por pregunta del
+    quiz). La racha se actualiza aparte, al completar el quiz entero (ver
+    `record_quiz_completion`), no por respuesta suelta."""
+    progression = progression or get_or_create_progression(user)
+    if correct:
+        progression.xp += constants.XP_PER_CORRECT
+        progression.coins += constants.COINS_PER_CORRECT
+        progression.save(update_fields=["xp", "coins"])
+    return progression
+
+
+def record_quiz_completion(
+    user, all_correct: bool, progression: Progression | None = None
+) -> Progression:
+    """Actualiza la racha según un quiz completado.
+
+    La racha cuenta quizes resueltos al 100%: cada quiz perfecto la incrementa
+    (dentro de la ventana de `STREAK_WINDOW_HOURS` continúa la anterior; si no,
+    arranca en 1). Un quiz con al menos una respuesta incorrecta la reinicia a 0.
+    """
     progression = progression or get_or_create_progression(user)
     now = timezone.now()
 
-    if not correct:
-        progression.streak = 0
-        progression.save(update_fields=["streak"])
-        return progression
-
-    if (
-        progression.last_streak_at
-        and now - progression.last_streak_at <= timedelta(hours=constants.STREAK_WINDOW_HOURS)
-    ):
-        progression.streak += 1
+    if all_correct:
+        if (
+            progression.last_streak_at
+            and now - progression.last_streak_at
+            <= timedelta(hours=constants.STREAK_WINDOW_HOURS)
+        ):
+            progression.streak += 1
+        else:
+            progression.streak = 1
+        progression.best_streak = max(progression.best_streak, progression.streak)
+        progression.last_streak_at = now
     else:
-        progression.streak = 1
+        progression.streak = 0
 
-    progression.best_streak = max(progression.best_streak, progression.streak)
-    progression.xp += constants.XP_PER_CORRECT
-    progression.coins += constants.COINS_PER_CORRECT
-    progression.last_streak_at = now
-    progression.save(
-        update_fields=[
-            "streak",
-            "best_streak",
-            "xp",
-            "coins",
-            "last_streak_at",
-        ]
-    )
+    progression.save(update_fields=["streak", "best_streak", "last_streak_at"])
     return progression
 
 
