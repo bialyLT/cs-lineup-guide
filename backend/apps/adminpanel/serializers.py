@@ -19,7 +19,13 @@ from apps.progression.models import (
     VideoRewardClaim,
     VideoRewardConfig,
 )
-from apps.quiz.models import Option, Question, Quiz, QuizQuestion
+from apps.quiz.models import (
+    Option,
+    Question,
+    QuestionReport,
+    Quiz,
+    QuizQuestion,
+)
 
 from .models import AdminAuditLog
 
@@ -234,6 +240,24 @@ class AdminVideoRewardClaimSerializer(serializers.ModelSerializer):
     class Meta:
         model = VideoRewardClaim
         fields = ["id", "user", "username", "claimed_at"]
+        read_only_fields = fields
+
+
+class AdminQuestionReportSerializer(serializers.ModelSerializer):
+    reason_display = serializers.CharField(
+        source="get_reason_display", read_only=True
+    )
+
+    class Meta:
+        model = QuestionReport
+        fields = [
+            "id",
+            "question",
+            "reason",
+            "reason_display",
+            "detail",
+            "created_at",
+        ]
         read_only_fields = fields
 
 

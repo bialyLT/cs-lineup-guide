@@ -51,6 +51,9 @@ router.register(
 router.register(
     "audit-logs", views.AdminAuditLogViewSet, basename="admin-audit-logs"
 )
+router.register(
+    "question-reports", views.QuestionReportViewSet, basename="admin-question-reports"
+)
 
 urlpatterns = [
     path("stats/", views.AdminStatsView.as_view(), name="admin-stats"),

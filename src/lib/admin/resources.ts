@@ -111,6 +111,8 @@ export interface AdminResourceConfig {
   filters?: AdminFilter[];
   /** Acción por fila que enlaza a un recurso relacionado (ej. Lugares de un mapa). */
   rowLink?: { label: string; href: (id: number | string) => string };
+  /** Acciones de cabecera que enlazan a otra sección (ej. ver reportes). */
+  headerActions?: { label: string; href: string }[];
 }
 
 const UTILITY_TYPES = [
@@ -284,6 +286,9 @@ export const adminResources: AdminResourceConfig[] = [
     label: "Preguntas",
     singular: "Pregunta",
     description: "Preguntas de los quizzes: de un lineup, de un lugar o del mapa.",
+    headerActions: [
+      { label: "Ver reportes", href: "/admin/question-reports" },
+    ],
     listColumns: ["id", "map", "lineup", "place", "type", "prompt"],
     filters: [
       { name: "map", label: "Mapa", options: "relation", resource: "maps", displayField: "name" },
@@ -532,6 +537,21 @@ export const adminResources: AdminResourceConfig[] = [
       { name: "summary", label: "Resumen", type: "text", readOnly: true },
       { name: "ip_address", label: "IP", type: "text", readOnly: true },
       { name: "created_at", label: "Fecha", type: "datetime", readOnly: true },
+    ],
+  },
+  {
+    key: "question-reports",
+    label: "Reportes de preguntas",
+    singular: "Reporte",
+    description: "Reportes anónimos de preguntas enviados por los usuarios.",
+    readOnly: true,
+    listColumns: ["id", "question", "reason_display", "detail", "created_at"],
+    fields: [
+      { name: "id", label: "ID", type: "number", hidden: true },
+      { name: "question", label: "Pregunta", type: "relation", resource: "questions", displayField: "prompt", readOnly: true },
+      { name: "reason_display", label: "Motivo", type: "text", readOnly: true },
+      { name: "detail", label: "Detalle", type: "textarea", readOnly: true },
+      { name: "created_at", label: "Creado", type: "datetime", readOnly: true },
     ],
   },
 ];

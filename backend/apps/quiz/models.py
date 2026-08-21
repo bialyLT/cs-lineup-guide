@@ -169,3 +169,31 @@ class QuizConfig(models.Model):
 
     def __str__(self) -> str:
         return f"Difícil: {self.hard_seconds_per_question}s por pregunta"
+
+
+class QuestionReport(models.Model):
+    """Reporte anónimo de una pregunta (sin datos de quién lo hizo)."""
+
+    REASON_LINEUP_INCORRECTO = "lineup_incorrecto"
+    REASON_RESPUESTA_MAL = "respuesta_mal"
+    REASON_OTRO = "otro"
+    REASON_CHOICES = [
+        (REASON_LINEUP_INCORRECTO, "Lineup incorrecto"),
+        (REASON_RESPUESTA_MAL, "La respuesta está mal"),
+        (REASON_OTRO, "Otro"),
+    ]
+
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="reports"
+    )
+    reason = models.CharField("motivo", max_length=30, choices=REASON_CHOICES)
+    detail = models.TextField("detalle", blank=True)
+    created_at = models.DateTimeField("creado", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "reporte de pregunta"
+        verbose_name_plural = "reportes de pregunta"
+
+    def __str__(self) -> str:
+        return f"Reporte #{self.pk} · {self.get_reason_display()}"

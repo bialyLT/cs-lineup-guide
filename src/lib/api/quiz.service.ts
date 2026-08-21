@@ -93,6 +93,15 @@ export interface QuizAvailabilityQuery {
   type?: string;
 }
 
+/** Motivos de reporte de una pregunta (debe coincidir con QuestionReport en el backend). */
+export const REPORT_REASONS = [
+  { value: "lineup_incorrecto", label: "Lineup incorrecto" },
+  { value: "respuesta_mal", label: "La respuesta está mal" },
+  { value: "otro", label: "Otro" },
+] as const;
+
+export type ReportReason = (typeof REPORT_REASONS)[number]["value"];
+
 /** Creación y respuesta de quizzes contra el backend. */
 export const quizService = {
   /** Genera un quiz a partir de un set de slugs de mapas. */
@@ -152,4 +161,14 @@ export const quizService = {
         streak: raw.streak,
         bestStreak: raw.best_streak,
       })),
+
+  /** Reporta una pregunta (anónimo, sin datos de cuenta). */
+  reportQuestion: (
+    questionId: ID,
+    reason: ReportReason,
+    detail: string,
+  ): Promise<void> =>
+    apiClient
+      .post(`/questions/${questionId}/report/`, { reason, detail })
+      .then(() => undefined),
 };

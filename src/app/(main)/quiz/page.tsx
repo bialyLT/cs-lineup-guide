@@ -18,6 +18,7 @@ import { QuizFeedback } from "@/features/quiz/components/quiz-feedback";
 import { QuizHeader } from "@/features/quiz/components/quiz-header";
 import { QuizProgress } from "@/features/quiz/components/quiz-progress";
 import { ReferencePoint } from "@/features/quiz/components/reference-point";
+import { ReportQuestionModal } from "@/features/quiz/components/report-question-modal";
 
 const LETTERS = ["A", "B", "C", "D"];
 // Espejo de apps/progression/constants.py.
@@ -45,6 +46,7 @@ export default function QuizPage() {
   const [error, setError] = useState("");
   const [pendingAction, setPendingAction] = useState<"restart" | "home" | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
   const timeoutFired = useRef(false);
 
   useEffect(() => {
@@ -220,8 +222,22 @@ export default function QuizPage() {
             <Button size="lg" variant="ghost" onClick={handleRestart}>
               Repetir quiz
             </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              onClick={() => setReportOpen(true)}
+            >
+              Reportar una pregunta
+            </Button>
           </div>
         </motion.div>
+
+        {reportOpen ? (
+          <ReportQuestionModal
+            questions={quiz.questions}
+            onClose={() => setReportOpen(false)}
+          />
+        ) : null}
 
         <InterstitialAd
           open={pendingAction !== null}

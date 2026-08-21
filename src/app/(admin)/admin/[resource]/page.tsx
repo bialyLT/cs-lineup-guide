@@ -111,6 +111,11 @@ function AdminResourceListPageContent() {
             </Link>
           </Button>
         ) : null}
+        {resource.headerActions?.map((action) => (
+          <Button key={action.href} variant="outline" asChild>
+            <Link href={action.href}>{action.label}</Link>
+          </Button>
+        ))}
       </div>
 
       {resource.filters?.length ? (

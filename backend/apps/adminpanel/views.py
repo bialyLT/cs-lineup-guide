@@ -22,7 +22,13 @@ from apps.progression.models import (
     VideoRewardClaim,
     VideoRewardConfig,
 )
-from apps.quiz.models import Option, Question, Quiz, QuizQuestion
+from apps.quiz.models import (
+    Option,
+    Question,
+    QuestionReport,
+    Quiz,
+    QuizQuestion,
+)
 from apps.quiz.services import sync_map_location_questions
 
 from .mixins import AuditLogMixin
@@ -37,6 +43,7 @@ from .serializers import (
     AdminPlaceSerializer,
     AdminProgressionSerializer,
     AdminQuestionSerializer,
+    AdminQuestionReportSerializer,
     AdminQuestionTypeConfigSerializer,
     AdminQuizQuestionSerializer,
     AdminQuizSerializer,
@@ -223,6 +230,13 @@ class AdminAuditLogViewSet(AdminViewSetMixin, viewsets.ReadOnlyModelViewSet):
 
     queryset = AdminAuditLog.objects.select_related("actor").all()
     serializer_class = AdminAuditLogSerializer
+
+
+class QuestionReportViewSet(AdminViewSetMixin, viewsets.ReadOnlyModelViewSet):
+    """Solo lectura: registro de reportes de preguntas hechos por los usuarios."""
+
+    queryset = QuestionReport.objects.select_related("question").all()
+    serializer_class = AdminQuestionReportSerializer
 
 
 class AdminStatsView(APIView):

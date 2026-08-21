@@ -1,5 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,7 +13,15 @@ from apps.progression.services import (
 )
 from apps.maps.models import Map
 
-from .models import Option, Quiz, QuizAnswer, QuizConfig, QuizQuestion
+from .models import (
+    Option,
+    Question,
+    QuestionReport,
+    Quiz,
+    QuizAnswer,
+    QuizConfig,
+    QuizQuestion,
+)
 from .serializers import QuizSerializer
 from .services import (
     QuizGenerationError,
@@ -231,3 +240,40 @@ class QuizConfigView(APIView):
         return Response(
             {"hard_seconds_per_question": config.hard_seconds_per_question}
         )
+
+
+class ReportQuestionView(APIView):
+    """POST /api/questions/<pk>/report/  { reason, detail? }
+
+    Reporte anónimo de una pregunta. No se guarda quién lo hizo ni ningún dato
+    de la cuenta: solo la pregunta, el motivo y (si aplica) el detalle.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk: int):
+        question = Question.objects.filter(pk=pk).first()
+        if not question:
+            return Response(
+                {"detail": "Pregunta no encontrada."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        reason = request.data.get("reason")
+        detail = (request.data.get("detail") or "").strip()
+        valid_reasons = {choice[0] for choice in QuestionReport.REASON_CHOICES}
+        if reason not in valid_reasons:
+            return Response(
+                {"detail": "Motivo inválido."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if reason == QuestionReport.REASON_OTRO and not detail:
+            return Response(
+                {"detail": "Detallá el motivo para el reporte."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        QuestionReport.objects.create(
+            question=question, reason=reason, detail=detail
+        )
+        return Response({"ok": True}, status=status.HTTP_201_CREATED)
