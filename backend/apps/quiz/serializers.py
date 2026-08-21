@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Option, Question, Quiz
+from .prompts import question_prompt
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -24,6 +25,8 @@ class QuestionSerializer(serializers.ModelSerializer):
     lineup_title = serializers.CharField(
         source="lineup.title", read_only=True, default=None
     )
+    # El enunciado se deriva del tipo de pregunta (ver apps.quiz.prompts).
+    prompt = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -39,6 +42,9 @@ class QuestionSerializer(serializers.ModelSerializer):
             "lineup_title",
             "options",
         ]
+
+    def get_prompt(self, obj: Question) -> str:
+        return question_prompt(obj)
 
 
 class QuizSerializer(serializers.ModelSerializer):
