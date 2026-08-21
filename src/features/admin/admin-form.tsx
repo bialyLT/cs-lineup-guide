@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 import type { LookupMap } from "./admin-value";
 import { OptionsEditor, type DraftOption } from "./options-editor";
+import { questionPrompt, DEFAULT_QUESTION_PROMPT } from "@/lib/quiz/prompts";
 
 /** Archivo pendiente de subir junto con su preview local (object URL). */
 export interface AdminPendingFile {
@@ -73,6 +74,44 @@ export function AdminForm({
   const editable = resource.fields.filter((field) => !field.hidden);
   const isFixed = (name: string) =>
     Object.prototype.hasOwnProperty.call(fixedValues, name);
+
+  // Preguntas: el enunciado (prompt) se autocompleta según el tipo elegido.
+  const typeField = editable.find(
+    (field) => field.name === "type" && field.type === "select",
+  );
+  const promptField = editable.find(
+    (field) => field.name === "prompt" && field.type === "textarea",
+  );
+  const autoFilledPromptRef = useRef<string | null>(null);
+
+  function computePromptFor(typeVal: unknown, placeVal: unknown): string {
+    const type =
+      typeof typeVal === "string" && typeVal.length > 0 ? typeVal : "";
+    if (!type) return DEFAULT_QUESTION_PROMPT;
+    const placeName =
+      type === "map_location"
+        ? relationOptions["place"]?.get(String(placeVal ?? "")) ?? "el lugar"
+        : undefined;
+    return questionPrompt(type, placeName);
+  }
+
+  function maybeFillPrompt(typeVal: unknown, placeVal: unknown) {
+    if (!promptField) return;
+    const current = String(values[promptField.name] ?? "");
+    if (current === "" || current === autoFilledPromptRef.current) {
+      const next = computePromptFor(typeVal, placeVal);
+      autoFilledPromptRef.current = next;
+      setValue(promptField.name, next);
+    }
+  }
+
+  useEffect(() => {
+    if (!promptField || !typeField) return;
+    const initialType = values["type"] || effectiveValue(typeField);
+    maybeFillPrompt(initialType, values["place"]);
+    // Solo al montar: precargar el enunciado por defecto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [values, setValues] = useState<Record<string, unknown>>(() => {
     const initial: Record<string, unknown> = {};
@@ -902,7 +941,18 @@ if (field.type === "options-editor") {
                 id={`field-${field.name}`}
                 value={String(effectiveValue(field) ?? "")}
                 disabled={field.readOnly || isFixed(field.name)}
-                onChange={(event) => setValue(field.name, event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (field.name === typeField?.name) {
+                    setValue(field.name, value);
+                    maybeFillPrompt(value, values["place"]);
+                  } else if (field.name === "place") {
+                    setValue(field.name, value);
+                    maybeFillPrompt(values["type"], value);
+                  } else {
+                    setValue(field.name, value);
+                  }
+                }}
                 className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 dark:bg-input/30"
               >
                 {!field.required || field.readOnly ? (
