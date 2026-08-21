@@ -254,17 +254,20 @@ export default function QuizPage() {
               })}
             </QuestionImage>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col justify-center gap-2.5">
-              {question.options.map((option, i) => (
-                <AnswerOption
-                  key={option.id}
-                  text={option.text ?? ""}
-                  letter={LETTERS[i] ?? String(i + 1)}
-                  state={optionState(option.id)}
-                  onClick={() => setSelectedId(option.id)}
-                />
-              ))}
-            </div>
+            <>
+              <QuestionImage src={question.imageUrl} aspectRatio="aspect-[4/5]" />
+              <div className="flex min-h-0 flex-1 flex-col justify-center gap-2.5">
+                {question.options.map((option, i) => (
+                  <AnswerOption
+                    key={option.id}
+                    text={option.text ?? ""}
+                    letter={LETTERS[i] ?? String(i + 1)}
+                    state={optionState(option.id)}
+                    onClick={() => setSelectedId(option.id)}
+                  />
+                ))}
+              </div>
+            </>
           )}
 
           <div className="mt-auto flex shrink-0 items-center justify-between gap-3 pt-1">
