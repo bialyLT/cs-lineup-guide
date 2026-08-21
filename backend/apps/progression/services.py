@@ -429,13 +429,17 @@ def available_questions(
 
 def record_answer(user, correct: bool, progression: Progression | None = None) -> Progression:
     """Premia con XP/monedas cada respuesta correcta (una vez por pregunta del
-    quiz). La racha se actualiza aparte, al completar el quiz entero (ver
-    `record_quiz_completion`), no por respuesta suelta."""
+    quiz). Una respuesta incorrecta rompe la racha de inmediato (un quiz con
+    al menos una falla no puede ser 100% correcto). La racha solo se incrementa
+    al completar un quiz perfecto (ver `record_quiz_completion`)."""
     progression = progression or get_or_create_progression(user)
     if correct:
         progression.xp += constants.XP_PER_CORRECT
         progression.coins += constants.COINS_PER_CORRECT
         progression.save(update_fields=["xp", "coins"])
+    else:
+        progression.streak = 0
+        progression.save(update_fields=["streak"])
     return progression
 
 
