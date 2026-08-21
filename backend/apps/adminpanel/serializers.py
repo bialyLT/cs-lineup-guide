@@ -41,6 +41,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             "is_staff",
             "is_superuser",
             "is_active",
+            "plan",
             "date_joined",
             "last_login",
             "password",

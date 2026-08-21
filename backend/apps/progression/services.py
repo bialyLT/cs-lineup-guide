@@ -235,6 +235,12 @@ def _spend_coins(progression: Progression, cost: int) -> None:
 
 @transaction.atomic
 def unlock_map(user, map_: Map) -> Progression:
+    # Los mapas premium solo se compran con el plan Pro.
+    if map_.requires_pro_plan and user.plan != "pro":
+        raise UnlockError(
+            "Este mapa requiere el plan Pro para desbloquearlo.",
+            code="plan_required",
+        )
     if map_.is_free:
         return get_or_create_progression(user)
     if is_map_unlocked(user, map_):

@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ChevronDown,
   Coins,
+  Crown,
   LoaderCircle,
   Lock,
   MapPin,
@@ -54,6 +55,8 @@ export default function MapDetailPage() {
   });
   const coins = me?.progression.coins ?? 0;
   const remainingStarter = me?.unlocked.remainingStarterPlaces ?? 0;
+  const userPlan = me?.user.plan ?? "free";
+  const proLocked = Boolean(map?.requiresProPlan) && userPlan === "free";
 
   const unlock = useMutation({
     mutationFn: ({
@@ -139,6 +142,14 @@ export default function MapDetailPage() {
             <Badge variant="secondary" className="w-fit bg-success/10 text-success">
               Gratis
             </Badge>
+          ) : map.requiresProPlan && !map.unlocked ? (
+            <Badge
+              variant="secondary"
+              className="w-fit gap-1 bg-primary/10 text-primary"
+            >
+              <Crown className="size-3" />
+              Pro
+            </Badge>
           ) : locked ? (
             <Badge variant="secondary" className="w-fit gap-1">
               <Lock className="size-3" />
@@ -164,36 +175,51 @@ export default function MapDetailPage() {
 
       {locked ? (
         <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/40 p-4">
-          <p className="text-sm text-muted-foreground">
-            Desbloqueá el mapa para poder desbloquear sus lugares y lineups.
-          </p>
-          <Button
-            size="lg"
-            className="w-full"
-            disabled={coins < mapUnlockCost || unlock.isPending}
-            onClick={() => {
-              setError("");
-              unlock.mutate({ kind: "map", id: map.id });
-            }}
-          >
-            {unlock.isPending ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <>
-                <Unlock />
-                Desbloquear mapa
-                <span className="ml-auto flex items-center gap-1">
-                  <Coins className="size-4" />
-                  {mapUnlockCost}
-                </span>
-              </>
-            )}
-          </Button>
-          {coins < mapUnlockCost ? (
-            <p className="text-center text-xs text-muted-foreground">
-              Te faltan {mapUnlockCost - coins} monedas. Ganá monedas en los quizzes.
-            </p>
-          ) : null}
+          {proLocked ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Este mapa es exclusivo del Plan Pro. Pasate al plan Pro para
+                desbloquearlo con monedas.
+              </p>
+              <Button size="lg" className="w-full" disabled>
+                <Crown />
+                Requiere Plan Pro
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Desbloqueá el mapa para poder desbloquear sus lugares y lineups.
+              </p>
+              <Button
+                size="lg"
+                className="w-full"
+                disabled={coins < mapUnlockCost || unlock.isPending}
+                onClick={() => {
+                  setError("");
+                  unlock.mutate({ kind: "map", id: map.id });
+                }}
+              >
+                {unlock.isPending ? (
+                  <LoaderCircle className="animate-spin" />
+                ) : (
+                  <>
+                    <Unlock />
+                    Desbloquear mapa
+                    <span className="ml-auto flex items-center gap-1">
+                      <Coins className="size-4" />
+                      {mapUnlockCost}
+                    </span>
+                  </>
+                )}
+              </Button>
+              {coins < mapUnlockCost ? (
+                <p className="text-center text-xs text-muted-foreground">
+                  Te faltan {mapUnlockCost - coins} monedas. Ganá monedas en los quizzes.
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
       ) : null}
 

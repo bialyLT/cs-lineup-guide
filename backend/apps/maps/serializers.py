@@ -91,7 +91,7 @@ class MapSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Map
-        fields = ["id", "name", "image_url", "is_free", "unlocked", "unlock_cost", "unlock_stats", "places"]
+        fields = ["id", "name", "image_url", "is_free", "requires_pro_plan", "unlocked", "unlock_cost", "unlock_stats", "places"]
         read_only_fields = fields
 
     def get_unlocked(self, obj: Map) -> bool:

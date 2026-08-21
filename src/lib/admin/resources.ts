@@ -148,7 +148,7 @@ export const adminResources: AdminResourceConfig[] = [
     label: "Usuarios",
     singular: "Usuario",
     description: "Cuentas del sistema y sus permisos.",
-    listColumns: ["id", "username", "email", "display_name", "is_staff", "is_active"],
+    listColumns: ["id", "username", "email", "display_name", "plan", "is_staff", "is_active"],
     fields: [
       { name: "id", label: "ID", type: "number", hidden: true },
       { name: "username", label: "Nombre de usuario", type: "text", required: true },
@@ -156,6 +156,16 @@ export const adminResources: AdminResourceConfig[] = [
       { name: "display_name", label: "Nombre visible", type: "text" },
       { name: "first_name", label: "Nombre", type: "text" },
       { name: "last_name", label: "Apellido", type: "text" },
+      {
+        name: "plan",
+        label: "Plan",
+        type: "select",
+        options: [
+          { value: "free", label: "Free" },
+          { value: "pro", label: "Pro" },
+        ],
+        helpText: "Free: solo Mirage y Dust II. Pro: todos los mapas.",
+      },
       { name: "is_staff", label: "Staff (acceso al panel)", type: "boolean" },
       { name: "is_superuser", label: "Superusuario", type: "boolean" },
       { name: "is_active", label: "Activo", type: "boolean" },

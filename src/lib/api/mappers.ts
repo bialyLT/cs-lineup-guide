@@ -7,6 +7,7 @@ export interface ApiUser {
   email?: string;
   is_staff?: boolean;
   is_email_verified?: boolean;
+  plan?: string;
 }
 
 export interface ApiProgression {
@@ -24,6 +25,7 @@ export function mapApiUser(raw: ApiUser): User {
     email: raw.email,
     isStaff: Boolean(raw.is_staff),
     isEmailVerified: Boolean(raw.is_email_verified),
+    plan: (raw.plan === "pro" ? "pro" : "free") as "free" | "pro",
   };
 }
 

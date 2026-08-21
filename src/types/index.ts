@@ -37,6 +37,8 @@ export interface User {
   isStaff?: boolean;
   /** true si el usuario confirmó su email (requerido para entrar). */
   isEmailVerified?: boolean;
+  /** Plan de suscripción: "free" o "pro". */
+  plan?: "free" | "pro";
 }
 
 /** Conteos de desbloqueo de un mapa (lugares y lineups). */
@@ -53,6 +55,8 @@ export interface Map {
   imageUrl?: string;
   /** true si el mapa está disponible sin desbloquear. */
   isFree: boolean;
+  /** true si solo los usuarios con plan Pro pueden comprarlo. */
+  requiresProPlan?: boolean;
   /** true si el usuario ya lo desbloqueó. */
   unlocked: boolean;
   /** Costo en monedas para desbloquear el mapa (0 si es gratis). */

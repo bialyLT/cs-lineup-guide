@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clapperboard,
   Coins,
+  Crown,
   Flame,
   MapPin,
   ShieldCheck,
@@ -67,6 +68,7 @@ export default function PerfilPage() {
     .toUpperCase();
   const unlockedPlaces = me.unlocked.places.length;
   const top = ranking?.you.rank;
+  const plan = me.user.plan ?? "free";
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,9 +82,16 @@ export default function PerfilPage() {
           <span className="text-lg font-semibold tracking-tight">
             {user?.displayName || user?.username}
           </span>
-          <Badge variant="secondary" className="w-fit">
-            Jugador activo
-          </Badge>
+          {plan === "pro" ? (
+            <Badge variant="secondary" className="w-fit gap-1 bg-primary/10 text-primary">
+              <Crown className="size-3" />
+              Plan Pro
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="w-fit">
+              Plan Free
+            </Badge>
+          )}
         </div>
       </section>
 

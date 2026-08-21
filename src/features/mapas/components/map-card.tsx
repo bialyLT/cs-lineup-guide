@@ -68,6 +68,11 @@ export function MapCard({ map, selected = false, href, progress, onToggle, class
         <span className={cn("text-sm font-semibold", locked && "text-muted-foreground")}>
           {map.name}
         </span>
+        {map.requiresProPlan ? (
+          <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
+            Pro
+          </Badge>
+        ) : null}
         {map.isFree ? (
           <Badge variant="secondary" className="bg-success/10 text-success">
             Gratis

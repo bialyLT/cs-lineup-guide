@@ -33,6 +33,7 @@ export interface ApiMap {
   name: string;
   image_url?: string | null;
   is_free: boolean;
+  requires_pro_plan?: boolean | null;
   unlocked: boolean;
   unlock_cost?: number | null;
   unlock_stats?: ApiUnlockStats | null;
@@ -75,6 +76,7 @@ function mapApiMap(raw: ApiMap): Map {
     name: raw.name,
     imageUrl: raw.image_url ?? undefined,
     isFree: raw.is_free,
+    requiresProPlan: raw.requires_pro_plan ?? false,
     unlocked: raw.unlocked,
     unlockCost: raw.unlock_cost ?? undefined,
     unlockStats: raw.unlock_stats

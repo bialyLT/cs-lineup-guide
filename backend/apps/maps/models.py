@@ -14,6 +14,11 @@ class Map(models.Model):
     slug = models.SlugField("slug", max_length=50, unique=True)
     image_url = models.URLField("imagen", blank=True)
     is_free = models.BooleanField("gratis", default=False)
+    requires_pro_plan = models.BooleanField(
+        "requiere plan Pro",
+        default=False,
+        help_text="Si es True, solo los usuarios con plan Pro pueden comprarlo.",
+    )
     order = models.PositiveSmallIntegerField("orden", default=0)
 
     class Meta:

@@ -22,11 +22,11 @@ class Command(BaseCommand):
         Map.objects.all().delete()
 
         mirage = self.map_("Mirage", "mirage", 1, is_free=True)
-        inferno = self.map_("Inferno", "inferno", 2)
+        inferno = self.map_("Inferno", "inferno", 2, requires_pro_plan=True)
         dust2 = self.map_("Dust II", "dust2", 3)
-        nuke = self.map_("Nuke", "nuke", 4)
-        ancient = self.map_("Ancient", "ancient", 5)
-        anubis = self.map_("Anubis", "anubis", 6)
+        nuke = self.map_("Nuke", "nuke", 4, requires_pro_plan=True)
+        ancient = self.map_("Ancient", "ancient", 5, requires_pro_plan=True)
+        anubis = self.map_("Anubis", "anubis", 6, requires_pro_plan=True)
 
         # ----- Mirage (gratis) -----
         a_site = self.place(mirage, "A site", 1, 58, 30)
@@ -131,8 +131,21 @@ class Command(BaseCommand):
 
     # ----- Helpers -----
 
-    def map_(self, name: str, slug: str, order: int, is_free: bool = False) -> Map:
-        return Map.objects.create(name=name, slug=slug, order=order, is_free=is_free)
+    def map_(
+        self,
+        name: str,
+        slug: str,
+        order: int,
+        is_free: bool = False,
+        requires_pro_plan: bool = False,
+    ) -> Map:
+        return Map.objects.create(
+            name=name,
+            slug=slug,
+            order=order,
+            is_free=is_free,
+            requires_pro_plan=requires_pro_plan,
+        )
 
     def place(self, map_: Map, name: str, order: int, x: int, y: int) -> Place:
         return Place.objects.create(

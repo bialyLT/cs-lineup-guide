@@ -3,9 +3,21 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class Plan(models.TextChoices):
+    FREE = "free", "Free"
+    PRO = "pro", "Pro"
+
+
 class User(AbstractUser):
     """Usuario del sistema. Se mantiene AbstractUser (username + email + password)."""
 
+    plan = models.CharField(
+        "plan",
+        max_length=10,
+        choices=Plan.choices,
+        default=Plan.FREE,
+        help_text="Plan de suscripción del usuario (Free o Pro).",
+    )
     display_name = models.CharField("nombre visible", max_length=50, blank=True)
     is_email_verified = models.BooleanField(
         "email verificado",
