@@ -40,6 +40,8 @@ class UnlockError(Exception):
 
 def user_level(user) -> int:
     """Nivel del usuario, derivado de la XP (espejo de src/lib/xp.ts)."""
+    if _is_anonymous(user):
+        return 1
     progression = get_or_create_progression(user)
     return progression.xp // constants.XP_PER_LEVEL + 1
 
@@ -75,6 +77,8 @@ def get_free_question_types() -> list[str]:
 def get_unlocked_utilities(user) -> set[str]:
     """Utilidades desbloqueadas por nivel, según la config del tipo utility
     (smoke=2, molotov=3, flash=4, he=5, decoy=6)."""
+    if _is_anonymous(user):
+        return set()
     level = user_level(user)
     config = QuestionTypeConfig.objects.filter(
         question_type=QuestionType.UTILITY.value
@@ -86,15 +90,25 @@ def get_unlocked_utilities(user) -> set[str]:
 # ----- Consultas de estado -------------------------------------------------
 
 
+def _is_anonymous(user) -> bool:
+    return bool(getattr(user, "is_anonymous", False))
+
+
 def get_unlocked_map_slugs(user) -> set[str]:
+    if _is_anonymous(user):
+        return set()
     return set(UserMapUnlock.objects.filter(user=user).values_list("map__slug", flat=True))
 
 
 def get_unlocked_place_ids(user) -> set[int]:
+    if _is_anonymous(user):
+        return set()
     return set(UserPlaceUnlock.objects.filter(user=user).values_list("place_id", flat=True))
 
 
 def get_unlocked_lineup_ids(user) -> set[int]:
+    if _is_anonymous(user):
+        return set()
     return set(
         UserLineupUnlock.objects.filter(user=user).values_list("lineup_id", flat=True)
     )
@@ -102,6 +116,8 @@ def get_unlocked_lineup_ids(user) -> set[int]:
 
 def unlocked_places_per_map(user) -> dict[int, int]:
     """map_id → cantidad de lugares desbloqueados por el usuario (una consulta)."""
+    if _is_anonymous(user):
+        return {}
     rows = (
         UserPlaceUnlock.objects.filter(user=user)
         .values("place__map_id")
@@ -113,6 +129,8 @@ def unlocked_places_per_map(user) -> dict[int, int]:
 def get_unlocked_question_types(user) -> set[str]:
     """Tipos disponibles para el usuario: los desbloqueados por nivel
     (config, incluidos los de nivel 0) más los comprados con monedas."""
+    if _is_anonymous(user):
+        return set(get_free_question_types())
     owned = set(
         UserQuestionTypeUnlock.objects.filter(user=user).values_list(
             "question_type", flat=True

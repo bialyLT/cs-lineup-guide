@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
 
 from apps.progression.services import (
     get_unlocked_lineup_ids,
@@ -92,6 +93,12 @@ class LineupDetailView(generics.GenericAPIView):
             return Response(
                 {"detail": "Lineup no encontrado."},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if request.user.is_anonymous:
+            return Response(
+                {"detail": "Tenés que iniciar sesión para ver este lineup."},
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         unlocked_lineup_ids = get_unlocked_lineup_ids(request.user)

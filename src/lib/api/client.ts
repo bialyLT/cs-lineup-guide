@@ -102,7 +102,6 @@ async function request<T>(
   init: RequestInit = {},
   query?: Query,
 ): Promise<T> {
-  const hadToken = Boolean(tokenStore.getAccess());
   let res: Response;
   try {
     res = await doFetch(path, init, query);
@@ -110,7 +109,7 @@ async function request<T>(
     throw new ApiError(0, error instanceof Error ? error.message : "Error de red");
   }
 
-  if (res.status === 401 && hadToken && (await refreshTokens())) {
+  if (res.status === 401 && (await refreshTokens())) {
     res = await doFetch(path, init, query);
   }
 
