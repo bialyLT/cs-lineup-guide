@@ -89,7 +89,10 @@ class LineupDetailView(generics.GenericAPIView):
             .first()
         )
         if not lineup:
-            raise PermissionDenied("Lineup no encontrado.")
+            return Response(
+                {"detail": "Lineup no encontrado."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         unlocked_lineup_ids = get_unlocked_lineup_ids(request.user)
         if lineup.id not in unlocked_lineup_ids:
