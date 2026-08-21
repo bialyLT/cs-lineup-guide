@@ -81,9 +81,10 @@ export default function QuizPage() {
   const question = questions[index];
   const total = questions.length;
   const isLast = index === total - 1;
-  // Solo "posición del jugador" muestra las opciones como puntos dentro de la
-  // imagen. El resto (incluido "lugares del mapa") las muestra como lista abajo.
-  const isVisual = question.type === "player_position";
+  // "Lugares del mapa" y "posición del jugador" muestran las opciones como
+  // puntos dentro de la imagen. El resto las muestra como lista abajo.
+  const isVisual =
+    question.type === "map_location" || question.type === "player_position";
 
   function handleNext() {
     if (isLast) {
