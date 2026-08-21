@@ -121,6 +121,10 @@ export interface Quiz {
   title: string;
   mapIds: ID[];
   questions: Question[];
+  /** "easy" (sin tiempo) o "hard" (timer). */
+  difficulty?: "easy" | "hard";
+  /** Segundos por pregunta en difícil; null/undefined en fácil. */
+  secondsPerQuestion?: number | null;
 }
 
 /**

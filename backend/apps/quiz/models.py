@@ -79,11 +79,24 @@ class Option(models.Model):
 class Quiz(models.Model):
     """Quiz del usuario. Guarda los mapas elegidos y un snapshot de preguntas."""
 
+    DIFFICULTY_EASY = "easy"
+    DIFFICULTY_HARD = "hard"
+    DIFFICULTY_CHOICES = [
+        (DIFFICULTY_EASY, "Fácil"),
+        (DIFFICULTY_HARD, "Difícil"),
+    ]
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quizzes"
     )
     title = models.CharField("título", max_length=100)
     maps = models.ManyToManyField("maps.Map", related_name="quizzes", blank=True)
+    difficulty = models.CharField(
+        "dificultad",
+        max_length=10,
+        choices=DIFFICULTY_CHOICES,
+        default=DIFFICULTY_EASY,
+    )
     created_at = models.DateTimeField("creado", auto_now_add=True)
 
     class Meta:
@@ -128,8 +141,9 @@ class QuizAnswer(models.Model):
         on_delete=models.CASCADE,
         related_name="answer",
     )
+    # Nulo en timeouts: la pregunta se respondió como incorrecta sin opción.
     option = models.ForeignKey(
-        Option, on_delete=models.CASCADE, related_name="+"
+        Option, on_delete=models.CASCADE, related_name="+", null=True, blank=True
     )
     is_correct = models.BooleanField("correcta", default=False)
     answered_at = models.DateTimeField("respondida", auto_now_add=True)
@@ -140,3 +154,18 @@ class QuizAnswer(models.Model):
 
     def __str__(self) -> str:
         return f"{self.quiz_question} · {'correcta' if self.is_correct else 'incorrecta'}"
+
+
+class QuizConfig(models.Model):
+    """Configuración global del quiz. Hoy: tiempo por pregunta en dificultad difícil."""
+
+    hard_seconds_per_question = models.PositiveIntegerField(
+        "segundos por pregunta (difícil)", default=20
+    )
+
+    class Meta:
+        verbose_name = "configuración de quiz"
+        verbose_name_plural = "configuración de quiz"
+
+    def __str__(self) -> str:
+        return f"Difícil: {self.hard_seconds_per_question}s por pregunta"

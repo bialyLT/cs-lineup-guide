@@ -64,6 +64,10 @@ export default function QuizCreatePage() {
     queryKey: ["me"],
     queryFn: userService.me,
   });
+  const { data: quizConfig } = useQuery({
+    queryKey: ["quiz-config"],
+    queryFn: quizService.config,
+  });
 
   const [scope, setScope] = useState<Scope>("select");
   // touched=true una vez que el usuario eligió manualmente (evita pisar la preselección).
@@ -76,6 +80,7 @@ export default function QuizCreatePage() {
   const [lineupsTouched, setLineupsTouched] = useState(false);
   const [selectedLineups, setSelectedLineups] = useState<Set<string>>(new Set());
   const [questionType, setQuestionType] = useState("");
+  const [difficulty, setDifficulty] = useState<"easy" | "hard">("easy");
   const [count, setCount] = useState(0);
   const [error, setError] = useState("");
   const [adVisible, setAdVisible] = useState(false);
@@ -240,13 +245,14 @@ export default function QuizCreatePage() {
   }, [max, total]);
 
   const generate = useMutation({
-    mutationFn: (mapIds: string[]) =>
-      quizService.create(mapIds, {
-        placeIds: [...effectivePlaces].map(Number),
-        lineupIds: [...effectiveLineups].map(Number),
-        questionType: questionType || undefined,
-        count: effectiveCount || undefined,
-      }),
+      mutationFn: (mapIds: string[]) =>
+        quizService.create(mapIds, {
+          placeIds: [...effectivePlaces].map(Number),
+          lineupIds: [...effectiveLineups].map(Number),
+          questionType: questionType || undefined,
+          count: effectiveCount || undefined,
+          difficulty,
+        }),
     onSuccess: (quiz) => {
       quizSession.save(quiz);
     },
@@ -482,10 +488,42 @@ export default function QuizCreatePage() {
 
       {toggled.length > 0 ? (
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-muted-foreground">Cantidad de preguntas</h2>
-            <span className="text-sm font-semibold tabular-nums">{effectiveCount}</span>
+          <h2 className="text-sm font-semibold text-muted-foreground">Dificultad</h2>
+          <div className="flex flex-wrap gap-2">
+            {(["easy", "hard"] as const).map((value) => {
+              const label = value === "easy" ? "Fácil" : "Difícil";
+              const isActive = difficulty === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setDifficulty(value)}
+                  aria-pressed={isActive}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-sm transition-colors",
+                    isActive
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:bg-muted",
+                  )}
+                >
+                  {label}
+                  {value === "hard" && quizConfig
+                    ? ` · ${quizConfig.hardSecondsPerQuestion}s`
+                    : ""}
+                </button>
+              );
+            })}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Fácil va sin tiempo. Difícil usa un timer por pregunta (se ajusta en el panel).
+          </p>
+        </div>
+      ) : null}
+
+      {toggled.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-muted-foreground">Cantidad de preguntas</h2>
+          <span className="text-sm font-semibold tabular-nums">{effectiveCount}</span>
           {max > 0 ? (
             <>
               <div className="flex flex-wrap gap-2">

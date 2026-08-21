@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
@@ -44,13 +44,15 @@ export default function QuizPage() {
   const [result, setResult] = useState<AnswerResponse | null>(null);
   const [error, setError] = useState("");
   const [pendingAction, setPendingAction] = useState<"restart" | "home" | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const timeoutFired = useRef(false);
 
   useEffect(() => {
     if (!quiz) router.replace("/quiz/crear");
   }, [quiz, router]);
 
   const answer = useMutation({
-    mutationFn: (vars: { questionId: string; optionId: string }) => {
+    mutationFn: (vars: { questionId: string; optionId: string | null }) => {
       if (!quiz) throw new Error("Quiz no disponible.");
       return quizService.submitAnswer(quiz.id, vars.questionId, vars.optionId);
     },
@@ -72,6 +74,32 @@ export default function QuizPage() {
   // servidor la pisa una vez se responde la primera pregunta).
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: userService.me });
   const currentStreak = me?.progression.streak ?? 0;
+
+  // Timer solo en dificultad difícil (secondsPerQuestion definido por el backend).
+  const timerSeconds = quiz?.secondsPerQuestion ?? null;
+  const timerActive = typeof timerSeconds === "number" && timerSeconds > 0;
+
+  // El timer se reinicia en cada pregunta y corre solo durante "answering".
+  useEffect(() => {
+    timeoutFired.current = false;
+  }, [index]);
+
+  useEffect(() => {
+    if (!timerActive || phase !== "answering") return;
+    setTimeLeft(timerSeconds);
+    const id = setInterval(
+      () => setTimeLeft((value) => Math.max(0, (value ?? 0) - 1)),
+      1000,
+    );
+    return () => clearInterval(id);
+  }, [index, phase, timerSeconds, timerActive]);
+
+  useEffect(() => {
+    if (timerActive && phase === "answering" && timeLeft === 0 && !timeoutFired.current) {
+      timeoutFired.current = true;
+      handleTimeout();
+    }
+  }, [timeLeft, phase, timerActive]);
 
   if (!quiz || quiz.questions.length === 0) {
     return (
@@ -127,6 +155,13 @@ export default function QuizPage() {
       setError("");
       setPhase("answering");
     }
+  }
+
+  // Al vencer el tiempo se envía la pregunta como incorrecta (rompe la racha).
+  function handleTimeout() {
+    if (!quiz) return;
+    if (answer.isPending) return;
+    answer.mutate({ questionId: question.id, optionId: null });
   }
 
   // Durante el feedback se destaca la opción correcta aunque el usuario haya fallado.
@@ -222,6 +257,22 @@ export default function QuizPage() {
                 : undefined
             }
           />
+
+          {timerActive ? (
+            <div className="flex items-center gap-3">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-warning transition-[width] duration-1000 ease-linear"
+                  style={{
+                    width: `${timerSeconds ? ((timeLeft ?? timerSeconds) / timerSeconds) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+              <span className="min-w-10 text-right text-sm font-semibold tabular-nums text-muted-foreground">
+                {timeLeft ?? timerSeconds}s
+              </span>
+            </div>
+          ) : null}
 
           {phase === "feedback" && result ? (
             <QuizFeedback

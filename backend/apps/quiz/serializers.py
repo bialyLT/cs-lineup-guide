@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Option, Question, Quiz
+from .models import Option, Question, Quiz, QuizConfig
 from .prompts import question_prompt
 
 
@@ -52,10 +52,24 @@ class QuizSerializer(serializers.ModelSerializer):
         source="maps", slug_field="slug", many=True, read_only=True
     )
     questions = serializers.SerializerMethodField()
+    seconds_per_question = serializers.SerializerMethodField()
 
     class Meta:
         model = Quiz
-        fields = ["id", "title", "map_ids", "questions"]
+        fields = [
+            "id",
+            "title",
+            "map_ids",
+            "difficulty",
+            "seconds_per_question",
+            "questions",
+        ]
+
+    def get_seconds_per_question(self, obj: Quiz) -> int | None:
+        if obj.difficulty != Quiz.DIFFICULTY_HARD:
+            return None
+        config = QuizConfig.objects.first()
+        return config.hard_seconds_per_question if config else 20
 
     def get_questions(self, obj: Quiz):
         quiz_questions = obj.quiz_questions.select_related(

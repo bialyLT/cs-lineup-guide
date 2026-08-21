@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Option, Question, Quiz, QuizQuestion
+from .models import Option, Question, Quiz, QuizConfig, QuizQuestion
 
 
 class OptionInline(admin.TabularInline):
@@ -23,8 +23,13 @@ class OptionAdmin(admin.ModelAdmin):
 
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
-    list_display = ["title", "user", "created_at"]
+    list_display = ["title", "user", "difficulty", "created_at"]
     filter_horizontal = ["maps"]
+
+
+@admin.register(QuizConfig)
+class QuizConfigAdmin(admin.ModelAdmin):
+    list_display = ["hard_seconds_per_question"]
 
 
 class QuizQuestionInline(admin.TabularInline):

@@ -12,7 +12,7 @@ from apps.progression.services import (
 )
 from apps.maps.models import Map
 
-from .models import Option, Quiz, QuizAnswer, QuizQuestion
+from .models import Option, Quiz, QuizAnswer, QuizConfig, QuizQuestion
 from .serializers import QuizSerializer
 from .services import (
     QuizGenerationError,
@@ -48,6 +48,11 @@ class GenerateQuizView(APIView):
         )
         question_type = serializers.CharField(required=False, allow_blank=True)
         count = serializers.IntegerField(required=False, min_value=1)
+        difficulty = serializers.ChoiceField(
+            choices=Quiz.DIFFICULTY_CHOICES,
+            required=False,
+            default=Quiz.DIFFICULTY_EASY,
+        )
 
     throttle_classes = [UserScopedRateThrottle]
     throttle_scope = "quiz_generate"
@@ -74,6 +79,7 @@ class GenerateQuizView(APIView):
                 lineup_ids=data.get("lineup_ids") or None,
                 question_type=data.get("question_type") or None,
                 count=data.get("count"),
+                difficulty=data.get("difficulty", Quiz.DIFFICULTY_EASY),
             )
         except QuizGenerationError as exc:
             return Response(
@@ -146,14 +152,19 @@ class AnswerQuestionView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        option = Option.objects.filter(
-            pk=request.data.get("option_id"), question=quiz_question.question
-        ).first()
-        if not option:
-            return Response(
-                {"detail": "Opción inválida para esta pregunta."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # option_id ausente (timeout) o inválido => la pregunta cuenta como
+        # incorrecta (rompe la racha, no da XP). Si viene, debe ser de esta pregunta.
+        option_id = request.data.get("option_id")
+        option = None
+        if option_id is not None:
+            option = Option.objects.filter(
+                pk=option_id, question=quiz_question.question
+            ).first()
+            if not option:
+                return Response(
+                    {"detail": "Opción inválida para esta pregunta."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         already_answered = QuizAnswer.objects.filter(
             quiz_question=quiz_question
@@ -161,13 +172,14 @@ class AnswerQuestionView(APIView):
 
         progression = get_or_create_progression(request.user)
         if not already_answered:
+            is_correct = option.is_correct if option else False
             progression = record_answer(
-                request.user, correct=option.is_correct, progression=progression
+                request.user, correct=is_correct, progression=progression
             )
             QuizAnswer.objects.create(
                 quiz_question=quiz_question,
                 option=option,
-                is_correct=option.is_correct,
+                is_correct=is_correct,
             )
 
             # ¿Quiz completo? (todas sus preguntas ya respondidas). La racha
@@ -182,12 +194,19 @@ class AnswerQuestionView(APIView):
                     request.user, all_correct=all_correct, progression=progression
                 )
 
+        # Corrección a devolver: la guardada si ya respondió, la nueva si no.
+        if already_answered:
+            stored = QuizAnswer.objects.filter(quiz_question=quiz_question).first()
+            is_correct = bool(stored.is_correct) if stored else False
+        else:
+            is_correct = option.is_correct if option else False
+
         correct_option = Option.objects.filter(
             question=quiz_question.question, is_correct=True
         ).first()
         return Response(
             {
-                "correct": option.is_correct,
+                "correct": is_correct,
                 "awarded": not already_answered,
                 "correct_option_id": correct_option.id if correct_option else None,
                 "xp": progression.xp,
@@ -195,4 +214,20 @@ class AnswerQuestionView(APIView):
                 "streak": progression.streak,
                 "best_streak": progression.best_streak,
             }
+        )
+
+
+class QuizConfigView(APIView):
+    """GET /api/quiz-config/  Devuelve la configuración global del quiz.
+
+    Hoy expone el tiempo por pregunta en dificultad difícil (editable en el
+    panel de administración).
+    """
+
+    def get(self, request):
+        from .services import get_quiz_config
+
+        config = get_quiz_config()
+        return Response(
+            {"hard_seconds_per_question": config.hard_seconds_per_question}
         )

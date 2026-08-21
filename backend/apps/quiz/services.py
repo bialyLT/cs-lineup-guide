@@ -6,7 +6,7 @@ from django.db import transaction
 from apps.maps.models import Map, Place
 from apps.progression.services import available_questions
 
-from .models import Option, Question, QuestionType, Quiz, QuizQuestion
+from .models import Option, Question, QuestionType, Quiz, QuizConfig, QuizQuestion
 
 MAP_LOCATION_PROMPT_PREFIX = "Marcá en el mapa dónde está"
 MAP_LOCATION_HELPER = "Elegí en el mapa el lugar que se indica."
@@ -69,6 +69,12 @@ class QuizGenerationError(Exception):
 
 
 @transaction.atomic
+def get_quiz_config() -> QuizConfig:
+    """Devuelve la configuración global del quiz (la crea con defaults si falta)."""
+    config, _ = QuizConfig.objects.get_or_create(pk=1)
+    return config
+
+
 def generate_quiz(
     user,
     maps: "models.QuerySet[Map]",
@@ -77,6 +83,7 @@ def generate_quiz(
     lineup_ids=None,
     question_type: str | None = None,
     count: int | None = None,
+    difficulty: str = Quiz.DIFFICULTY_EASY,
 ) -> Quiz:
     # El primer quiz del usuario es de lugares (map_location): enseña dónde
     # están los lugares que eligió al empezar. Después, quizzes completos.
@@ -107,6 +114,7 @@ def generate_quiz(
     quiz = Quiz.objects.create(
         user=user,
         title=title or "Quiz personalizado",
+        difficulty=difficulty,
     )
     quiz.maps.set(maps)
     QuizQuestion.objects.bulk_create(

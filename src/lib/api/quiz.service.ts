@@ -24,6 +24,8 @@ export interface ApiQuiz {
   id: number;
   title: string;
   map_ids: string[];
+  difficulty?: string;
+  seconds_per_question?: number | null;
   questions: ApiQuestion[];
 }
 
@@ -52,6 +54,8 @@ export function mapApiQuiz(raw: ApiQuiz): Quiz {
     id: String(raw.id),
     title: raw.title,
     mapIds: raw.map_ids,
+    difficulty: raw.difficulty === "hard" ? "hard" : "easy",
+    secondsPerQuestion: raw.seconds_per_question ?? null,
     questions: raw.questions.map(mapApiQuestion),
   };
 }
@@ -78,6 +82,8 @@ export interface CreateQuizOptions {
   questionType?: string;
   /** Cantidad de preguntas (máximo: las disponibles para la selección). */
   count?: number;
+  /** "easy" (sin tiempo) o "hard" (timer). */
+  difficulty?: "easy" | "hard";
 }
 
 export interface QuizAvailabilityQuery {
@@ -98,6 +104,7 @@ export const quizService = {
         ...(opts.lineupIds?.length ? { lineup_ids: opts.lineupIds } : {}),
         ...(opts.questionType ? { question_type: opts.questionType } : {}),
         ...(opts.count ? { count: opts.count } : {}),
+        ...(opts.difficulty ? { difficulty: opts.difficulty } : {}),
       })
       .then(mapApiQuiz),
 
@@ -109,8 +116,20 @@ export const quizService = {
       lineup_id: query.lineupIds?.length ? query.lineupIds : undefined,
       type: query.type,
     }),
-  /** Envía la respuesta de una pregunta dentro de un quiz y actualiza contadores. */
-  submitAnswer: (quizId: ID, questionId: ID, optionId: ID): Promise<AnswerResponse> =>
+
+  /** Configuración global del quiz (p. ej. segundos por pregunta en difícil). */
+  config: (): Promise<{ hardSecondsPerQuestion: number }> =>
+    apiClient
+      .get<{ hard_seconds_per_question: number }>("/quiz-config/")
+      .then((raw) => ({ hardSecondsPerQuestion: raw.hard_seconds_per_question })),
+
+  /** Envía la respuesta de una pregunta dentro de un quiz y actualiza contadores.
+   *  `optionId` en null indica timeout (se registra como incorrecta). */
+  submitAnswer: (
+    quizId: ID,
+    questionId: ID,
+    optionId: ID | null,
+  ): Promise<AnswerResponse> =>
     apiClient
       .post<{
         correct: boolean;
@@ -120,7 +139,9 @@ export const quizService = {
         coins: number;
         streak: number;
         best_streak: number;
-      }>(`/quizzes/${quizId}/questions/${questionId}/answer/`, { option_id: Number(optionId) })
+      }>(`/quizzes/${quizId}/questions/${questionId}/answer/`, {
+        option_id: optionId == null ? null : Number(optionId),
+      })
       .then((raw) => ({
         correct: raw.correct,
         awarded: raw.awarded,
