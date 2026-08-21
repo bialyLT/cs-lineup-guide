@@ -190,10 +190,30 @@ export interface VideoRewardStatus {
   nextClaimAt: string | null;
 }
 
+interface ApiVideoRewardStatus {
+  enabled: boolean;
+  coins: number;
+  cooldown_hours: number;
+  video_url: string;
+  eligible: boolean;
+  next_claim_at: string | null;
+}
+
+function mapVideoRewardStatus(raw: ApiVideoRewardStatus): VideoRewardStatus {
+  return {
+    enabled: raw.enabled,
+    coins: raw.coins,
+    cooldownHours: raw.cooldown_hours,
+    videoUrl: raw.video_url,
+    eligible: raw.eligible,
+    nextClaimAt: raw.next_claim_at,
+  };
+}
+
 export const videoRewardService = {
   /** GET /video-reward/ → estado del reward por video (monedas, cooldown). */
   status: (): Promise<VideoRewardStatus> =>
-    apiClient.get<VideoRewardStatus>("/video-reward/"),
+    apiClient.get<ApiVideoRewardStatus>("/video-reward/").then(mapVideoRewardStatus),
 
   /** POST /video-reward/claim/ → acredita las monedas al terminar el video. */
   claim: (): Promise<MePayload> =>

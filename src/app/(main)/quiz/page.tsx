@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { CheckCircle2, Flame, LoaderCircle, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { InterstitialAd } from "@/components/ads/interstitial-ad";
 import { quizService, type AnswerResponse } from "@/lib/api/quiz.service";
+import { userService } from "@/lib/api/user.service";
 import { quizSession } from "@/lib/quiz-session";
 import { AnswerOption } from "@/features/quiz/components/answer-option";
 import { QuestionCard } from "@/features/quiz/components/question-card";
@@ -62,6 +63,11 @@ export default function QuizPage() {
       setError(err instanceof Error ? err.message : "No se pudo enviar la respuesta.");
     },
   });
+
+  // Racha real del usuario antes de empezar a responder (la respuesta del
+  // servidor la pisa una vez se responde la primera pregunta).
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: userService.me });
+  const currentStreak = me?.progression.streak ?? 0;
 
   if (!quiz || quiz.questions.length === 0) {
     return (
@@ -261,7 +267,7 @@ export default function QuizPage() {
           <div className="mt-auto flex shrink-0 items-center justify-between gap-3 pt-1">
             <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium">
               <Flame className="size-4 text-warning" />
-              <span className="tabular-nums">{result?.streak ?? 0}</span> racha
+              <span className="tabular-nums">{result?.streak ?? currentStreak}</span> racha
             </span>
             {phase === "answering" ? (
               <Button
