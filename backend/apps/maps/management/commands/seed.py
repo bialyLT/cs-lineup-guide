@@ -65,12 +65,12 @@ class Command(BaseCommand):
             ["Molotov", "Flashbang", "Smoke", "Incendiaria"],
             correct=0,
         )
-        self.point_question(
+        self.text_question(
             molotov_a,
             QuestionType.LANDING_SPOT,
             "¿Dónde cae la molotov si tirás desde palacio?",
-            "Ubicá el punto de caída.",
-            [(30, 20), (62, 38), (40, 74), (76, 60)],
+            "Elegí la zona de caída.",
+            ["Sitio A", "Rampa", "Cuadrante B", "Borde del sitio"],
             correct=2,
         )
 
@@ -83,12 +83,12 @@ class Command(BaseCommand):
             [(50, 12), (24, 32), (70, 52), (44, 84)],
             correct=1,
         )
-        self.text_question(
+        self.point_question(
             smoke_aptos,
             QuestionType.MAP_LOCATION,
-            "¿Cómo se llama esta zona del mapa?",
-            "La ventana de este apartamento domina el sitio.",
-            ["Apartamento", "Café", "Conector", "Palacio"],
+            "¿Dónde está este lugar en el mapa?",
+            "Marcá el punto exacto sobre el mapa.",
+            [(50, 12), (24, 32), (70, 52), (44, 84)],
             correct=0,
         )
 
@@ -111,12 +111,12 @@ class Command(BaseCommand):
             [(28, 18), (52, 34), (66, 70), (20, 78)],
             correct=1,
         )
-        self.point_question(
+        self.text_question(
             smoke_conector,
             QuestionType.LANDING_SPOT,
             "¿Dónde cae el smoke de conector?",
-            "Ubicá el punto de caída.",
-            [(40, 26), (64, 46), (32, 62), (78, 34)],
+            "Elegí la zona de caída.",
+            ["Sitio A", "Rampa", "Cuadrante B", "Borde del sitio"],
             correct=0,
         )
 
