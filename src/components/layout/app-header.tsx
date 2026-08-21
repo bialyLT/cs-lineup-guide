@@ -1,9 +1,10 @@
 "use client";
 
-import { Crosshair, LogOut } from "lucide-react";
+import { Crosshair, Heart, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
+import { DONATION_URL } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 export function AppHeader({ className }: { className?: string }) {
@@ -23,13 +24,23 @@ export function AppHeader({ className }: { className?: string }) {
           </div>
           <span className="text-sm font-semibold tracking-tight">Smokeame Ventana</span>
         </div>
-        <Button
-          variant="ghost"
-          aria-label="Cerrar sesión"
-          onClick={logout}
-        >
-          <LogOut />
-        </Button>
+        <div className="flex items-center gap-1">
+          {DONATION_URL ? (
+            <Button asChild variant="outline" size="sm" aria-label="Donar">
+              <a href={DONATION_URL} target="_blank" rel="noopener noreferrer">
+                <Heart />
+                Donar
+              </a>
+            </Button>
+          ) : null}
+          <Button
+            variant="ghost"
+            aria-label="Cerrar sesión"
+            onClick={logout}
+          >
+            <LogOut />
+          </Button>
+        </div>
       </div>
     </header>
   );

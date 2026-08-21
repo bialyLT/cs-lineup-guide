@@ -8,6 +8,7 @@ import {
   Coins,
   Crown,
   Flame,
+  Heart,
   MapPin,
   ShieldCheck,
   Trophy,
@@ -16,11 +17,13 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/page-header";
 import { rankingService } from "@/lib/api/ranking.service";
 import { userService, videoRewardService } from "@/lib/api/user.service";
 import { useAuth } from "@/lib/auth/auth-context";
+import { DONATION_URL } from "@/lib/config";
 import { LevelProgressBar } from "@/features/perfil/components/level-progress-bar";
 import { StatCard } from "@/features/perfil/components/stat-card";
 import { RewardedVideoDialog } from "@/components/ads/rewarded-video-dialog";
@@ -158,6 +161,25 @@ export default function PerfilPage() {
           <p className="px-1 text-xs text-muted-foreground">
             Se puede reclamar una vez cada {reward.cooldownHours}{" "}
             {reward.cooldownHours === 1 ? "hora" : "horas"}.
+          </p>
+        </section>
+      ) : null}
+
+      <Separator />
+
+      {DONATION_URL ? (
+        <section className="flex flex-col gap-2">
+          <Button asChild size="lg" className="w-full">
+            <a href={DONATION_URL} target="_blank" rel="noopener noreferrer">
+              <Heart />
+              Donar
+              <span className="ml-auto text-xs font-normal opacity-80">
+                con el monto que quieras
+              </span>
+            </a>
+          </Button>
+          <p className="px-1 text-center text-xs text-muted-foreground">
+            Apoyanos con Mercado Pago para seguir sumando mapas y mejoras.
           </p>
         </section>
       ) : null}
