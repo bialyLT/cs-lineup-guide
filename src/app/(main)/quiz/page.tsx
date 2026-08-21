@@ -31,7 +31,11 @@ export default function QuizPage() {
   const router = useRouter();
   const [quiz] = useState(quizSession.load);
 
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => {
+    const saved = quizSession.loadIndex();
+    const length = quiz?.questions.length ?? 0;
+    return Math.min(saved, Math.max(length - 1, 0));
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("answering");
   const [correctCount, setCorrectCount] = useState(0);
@@ -92,7 +96,9 @@ export default function QuizPage() {
       quizSession.clear();
       return;
     }
-    setIndex((value) => value + 1);
+    const next = index + 1;
+    setIndex(next);
+    quizSession.saveIndex(next);
     setSelectedId(null);
     setResult(null);
     setPhase("answering");
@@ -192,7 +198,7 @@ export default function QuizPage() {
 }
 
   return (
-    <div className="-mx-4 -mt-8 flex min-h-dvh flex-col gap-3 px-4">
+    <div className="-mx-4 -mt-8 flex min-h-dvh flex-col gap-3 overflow-y-auto px-4 pb-4">
       <div className="-mx-4 shrink-0">
         <QuizHeader current={index + 1} total={total} title={quiz.title} />
         <QuizProgress value={((index + 1) / total) * 100} className="mx-4" />
