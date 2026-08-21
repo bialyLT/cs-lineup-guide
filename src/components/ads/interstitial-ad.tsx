@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 // Tag de la red publicitaria (Adsterra, PropellerAds, etc.). Mientras esté
 // vacío se muestra un placeholder para probar el flujo.
-const INTERSTITIAL_AD_HTML = `
+export const INTERSTITIAL_AD_HTML = `
 <script>
   atOptions = {
     'key' : '4aac2af46e20bda732af126b5582e73c',

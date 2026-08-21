@@ -9,8 +9,12 @@ from apps.progression.services import (
     unlocked_places_per_map,
 )
 
-from .models import Map, Place
-from .serializers import MapSerializer, PlaceDetailSerializer
+from .models import Lineup, Map, Place
+from .serializers import (
+    LineupDetailSerializer,
+    MapSerializer,
+    PlaceDetailSerializer,
+)
 
 
 class MapListView(generics.ListAPIView):
@@ -66,3 +70,33 @@ class PlaceListByMapView(generics.ListAPIView):
             },
             "request": self.request,
         }
+
+
+class LineupDetailView(generics.GenericAPIView):
+    """GET /api/lineups/<pk>/ → detalle de un lineup YA DESBLOQUEADO.
+
+    Si el lineup no está desbloqueado para el usuario, responde 403 (el
+    contenido —imágenes y descripción— no se sirve nunca a usuarios bloqueados).
+    """
+
+    serializer_class = LineupDetailSerializer
+
+    def get(self, request, pk: int):
+        lineup = (
+            Lineup.objects.filter(pk=pk)
+            .select_related("place__map")
+            .prefetch_related("images", "questions")
+            .first()
+        )
+        if not lineup:
+            raise PermissionDenied("Lineup no encontrado.")
+
+        unlocked_lineup_ids = get_unlocked_lineup_ids(request.user)
+        if lineup.id not in unlocked_lineup_ids:
+            raise PermissionDenied("Este lineup está bloqueado.")
+
+        serializer = self.get_serializer(
+            lineup,
+            context={"context": {"unlocked_lineup_ids": unlocked_lineup_ids}},
+        )
+        return Response(serializer.data)

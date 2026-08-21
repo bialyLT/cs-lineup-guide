@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   Lock,
   MapPin,
+  Play,
   Unlock,
 } from "lucide-react";
 
@@ -450,9 +451,15 @@ function PlaceRow({
                   ) : null}
                 </div>
                 {lineup.unlocked ? (
-                  <Badge variant="secondary" className="shrink-0">
-                    Desbloqueado
-                  </Badge>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Badge variant="secondary">Desbloqueado</Badge>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/mapas/${place.mapId}/${lineup.id}`}>
+                        <Play />
+                        Ver
+                      </Link>
+                    </Button>
+                  </div>
                 ) : (
                   <Button
                     size="sm"

@@ -91,6 +91,19 @@ function mapApiMap(raw: ApiMap): Map {
   };
 }
 
+export interface ApiLineupDetail {
+  id: number;
+  title: string;
+  util: string;
+  description?: string | null;
+  unlocked: boolean;
+  images: string[];
+  question_count: number;
+  map_slug: string;
+  map_name: string;
+  place_name: string;
+}
+
 /** Servicios de consulta de mapas. */
 export const mapService = {
   /** Todos los mapas con su estado de desbloqueo y sus lugares. */
@@ -103,5 +116,10 @@ export const mapService = {
   getPlaces: async (mapId: string): Promise<Place[]> => {
     const raw = await apiClient.get<ApiPlace[]>(`/maps/${mapId}/places/`);
     return raw.map((place) => mapApiPlace(place, mapId));
+  },
+
+  /** Detalle de un lineup ya desbloqueado (vista propia). 403 si está bloqueado. */
+  getLineup: async (id: string | number): Promise<ApiLineupDetail> => {
+    return apiClient.get<ApiLineupDetail>(`/lineups/${id}/`);
   },
 };

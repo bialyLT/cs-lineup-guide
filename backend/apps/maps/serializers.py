@@ -72,6 +72,57 @@ class LineupSerializer(serializers.ModelSerializer):
         return [image.image_url for image in obj.images.all()]
 
 
+class LineupDetailSerializer(serializers.ModelSerializer):
+    """Detalle de un lineup ya desbloqueado (vista propia del lineup).
+
+    Incluye el mapa y el lugar para armar la navegación de vuelta, y las
+    imágenes referenciadas. El acceso está protegido por la vista: solo se
+    sirve si el usuario lo tiene desbloqueado.
+    """
+
+    unlocked = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+    question_count = serializers.SerializerMethodField()
+    map_slug = serializers.SerializerMethodField()
+    map_name = serializers.SerializerMethodField()
+    place_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lineup
+        fields = [
+            "id",
+            "title",
+            "util",
+            "description",
+            "unlocked",
+            "images",
+            "question_count",
+            "map_slug",
+            "map_name",
+            "place_name",
+        ]
+        read_only_fields = fields
+
+    def get_unlocked(self, obj: Lineup) -> bool:
+        context = self.context.get("context", {})
+        return obj.id in context.get("unlocked_lineup_ids", set())
+
+    def get_images(self, obj: Lineup):
+        return [image.image_url for image in obj.images.all()]
+
+    def get_question_count(self, obj: Lineup) -> int:
+        return len(obj.questions.all())
+
+    def get_map_slug(self, obj: Lineup) -> str:
+        return obj.place.map.slug
+
+    def get_map_name(self, obj: Lineup) -> str:
+        return obj.place.map.name
+
+    def get_place_name(self, obj: Lineup) -> str:
+        return obj.place.name
+
+
 class PlaceDetailSerializer(PlaceSerializer):
     """Lugar con sus lineups (para la pantalla de mapa y el listado de mapas)."""
 
