@@ -2,11 +2,20 @@
 import random
 
 from django.db import transaction
+from django.utils import timezone
 
 from apps.maps.models import Map, Place
 from apps.progression.services import available_questions
 
-from .models import Option, Question, QuestionType, Quiz, QuizConfig, QuizQuestion
+from .models import (
+    Option,
+    Question,
+    QuestionType,
+    Quiz,
+    QuizAnswer,
+    QuizConfig,
+    QuizQuestion,
+)
 
 MAP_LOCATION_PROMPT_PREFIX = "Marcá en el mapa dónde está"
 MAP_LOCATION_HELPER = "Elegí en el mapa el lugar que se indica."
@@ -68,6 +77,69 @@ class QuizGenerationError(Exception):
     code = "quiz_generation_error"
 
 
+# Días tras un acierto tras los cuales la pregunta vuelve a tener prioridad.
+RECENT_CORRECT_DAYS = 3
+
+
+def _build_answer_history(user) -> dict[int, tuple[bool, object]]:
+    """Último resultado (correcto, fecha) por pregunta para ese usuario.
+
+    Solo nos importa la respuesta más reciente de cada pregunta para aplicar
+    repetición espaciada: lo que se acertó hace poco se evita; lo que se falló
+    o no se vio nunca se favorece.
+    """
+    history: dict[int, tuple[bool, object]] = {}
+    rows = (
+        QuizAnswer.objects.filter(quiz_question__quiz__user=user)
+        .order_by("quiz_question__question_id", "-answered_at")
+        .values_list("quiz_question__question_id", "is_correct", "answered_at")
+    )
+    for question_id, correct, answered_at in rows:
+        if question_id not in history:
+            history[question_id] = (correct, answered_at)
+    return history
+
+
+def _weight_for(question_id: int, history: dict[int, tuple[bool, object]]) -> float:
+    """Peso de selección: más alto = más probabilidad de caer en el quiz."""
+    info = history.get(question_id)
+    if info is None:
+        return 100.0  # nunca vista: prioridad máxima
+    correct, answered_at = info
+    age_days = (timezone.now() - answered_at).days
+    if not correct:
+        return 55.0  # fallada recientemente: conviene repasarla
+    if age_days <= RECENT_CORRECT_DAYS:
+        return 4.0  # acertada hace poco: evitar repetir
+    return 22.0  # acertada hace tiempo: refrescar
+
+
+def _interleave_by_type(questions: list) -> list:
+    """Reordena para alternar tipos y que no salgan 3 iguales seguidas.
+
+    Solo aplica cuando la selección tiene más de un tipo; si el usuario eligió
+    un único tipo (o el muestreo solo trajo uno) se devuelve igual, sin romper.
+    """
+    types = {q.type for q in questions}
+    if len(types) < 2:
+        return questions
+    groups: dict[str, list] = {}
+    for question in questions:
+        groups.setdefault(question.type, []).append(question)
+    order: list = []
+    keys = list(groups.keys())
+    while True:
+        added = False
+        for key in keys:
+            bucket = groups[key]
+            if bucket:
+                order.append(bucket.pop(0))
+                added = True
+        if not added:
+            break
+    return order
+
+
 @transaction.atomic
 def get_quiz_config() -> QuizConfig:
     """Devuelve la configuración global del quiz (la crea con defaults si falta)."""
@@ -90,24 +162,32 @@ def generate_quiz(
     is_first_quiz = not Quiz.objects.filter(user=user).exists()
     places_only = is_first_quiz and not place_ids and not lineup_ids and not question_type
 
-    questions = available_questions(
+    pool = available_questions(
         user,
         maps,
         places_only=places_only,
         place_ids=place_ids,
         lineup_ids=lineup_ids,
         question_type=question_type,
-    ).order_by(
-        "map__order", "place__order", "lineup__order", "lineup__place__order", "id"
     )
-    # Mezclamos ANTES de recortar a `count`: si cortáramos primero, como el
-    # queryset viene ordenado por mapa/lugar/lineup, las primeras `count`
-    # preguntas quedarían agrupadas (p.ej. todas de un mismo lineup). Así el
-    # subconjunto es una muestra uniforme y realmente al azar de todo lo elegido.
-    questions = list(questions)
-    random.shuffle(questions)
+    questions = list(pool)
+
+    # Repetición espaciada: ordenamos todo el pool por un peso que favorece las
+    # preguntas no vistas o falladas y relega las acertadas hace poco. Con pesos
+    # iguales (p.ej. usuario nuevo) esto equivale a un shuffle uniforme.
+    history = _build_answer_history(user)
+    weighted = sorted(
+        questions,
+        key=lambda q: random.random() ** (1.0 / _weight_for(q.id, history)),
+        reverse=True,
+    )
+    # Recortamos DESPUÉS de ordenar: así el subconjunto es una muestra sesgada
+    # hacia lo conveniente, no un bloque agrupado por mapa/lugar/lineup.
     if count is not None:
-        questions = questions[:max(1, count)]
+        weighted = weighted[:max(1, count)]
+
+    # Entremezclamos tipos solo si hay más de uno en la selección.
+    questions = _interleave_by_type(weighted)
 
     if not questions:
         raise QuizGenerationError(
