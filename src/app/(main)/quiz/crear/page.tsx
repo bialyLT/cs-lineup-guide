@@ -24,8 +24,7 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
   landing_spot: "Dónde cae",
   key_combo: "Teclas",
   player_position: "Jugador",
-  map_location: "Lugares",
-  map_area: "Zonas",
+  map_area: "Lugares",
 };
 
 const UTIL_SHORT_LABELS: Record<string, string> = {
@@ -266,7 +265,11 @@ export default function QuizCreatePage() {
     if (generate.isSuccess && !adVisible) router.push("/quiz");
   }, [generate.isSuccess, adVisible, router]);
 
-  const availableTypes = me?.unlocked.questionTypes ?? [];
+  // map_location quedó fuera de uso (las preguntas de lugar son map_area, una
+  // sola por lugar) para no duplicar el mismo sitio en el quiz.
+  const availableTypes = (me?.unlocked.questionTypes ?? []).filter(
+    (type) => type !== "map_location",
+  );
   const typeOptions = ["", ...availableTypes];
 
   return (
@@ -434,7 +437,9 @@ export default function QuizCreatePage() {
             Desbloqueo de tipos (configurable desde el panel &quot;Tipos de pregunta&quot;):
           </p>
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-            {(me?.unlocked.questionTypeConfigs ?? []).map((config) => {
+            {(me?.unlocked.questionTypeConfigs ?? [])
+              .filter((config) => config.questionType !== "map_location")
+              .map((config) => {
               const isUnlocked = availableTypes.includes(config.questionType);
               const unlock =
                 config.unlockLevel === null

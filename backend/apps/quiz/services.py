@@ -22,55 +22,14 @@ MAP_LOCATION_HELPER = "Elegí en el mapa el lugar que se indica."
 
 
 def sync_map_location_questions(map_: Map) -> None:
-    """Garantiza la pregunta de lugar (map_location) de cada lugar del mapa.
+    """Histórico: antes generaba una pregunta de lugar (map_location) por sitio.
 
-    Todo lugar con posición sobre un mapa con imagen recibe su pregunta
-    "Marcá en el mapa dónde está X." y sus opciones se reconstruyen para
-    reflejar todos los lugares marcados del mapa. Se invoca al crear, editar o
-    borrar lugares desde el panel de administración.
+    Hoy las preguntas de lugar se modelan con ``map_area`` (una sola por lugar,
+    validada por radio), así que este sync quedó inactivo para no duplicar el
+    mismo lugar en los quizzes. Se mantiene la firma por compatibilidad con las
+    señales del panel de administración.
     """
-    places = list(
-        map_.places.filter(
-            position_x__isnull=False, position_y__isnull=False
-        ).order_by("order")
-    )
-    if len(places) < 2 or not map_.image_url:
-        return
-
-    for place in places:
-        prompt = f"{MAP_LOCATION_PROMPT_PREFIX} {place.name}."
-        question, _ = Question.objects.get_or_create(
-            map=map_,
-            type=QuestionType.MAP_LOCATION,
-            place=place,
-            defaults={
-                "prompt": prompt,
-                "helper_text": MAP_LOCATION_HELPER,
-                "image_url": map_.image_url,
-            },
-        )
-        changed = False
-        if question.prompt != prompt:
-            question.prompt = prompt
-            changed = True
-        if question.image_url != map_.image_url:
-            question.image_url = map_.image_url
-            changed = True
-        if changed:
-            question.save(update_fields=["prompt", "image_url"])
-
-        question.options.all().delete()
-        Option.objects.bulk_create(
-            Option(
-                question=question,
-                text="",
-                position_x=candidate.position_x,
-                position_y=candidate.position_y,
-                is_correct=(candidate.id == place.id),
-                order=index,
-            )
-            for index, candidate in enumerate(places, start=1)
-        )
+    return
 
 
 MAP_AREA_PROMPT_PREFIX = "¿Dónde está"

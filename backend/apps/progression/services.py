@@ -380,12 +380,16 @@ def available_questions(
         return (
             Question.objects.filter(
                 map__in=maps,
-                type__in=[QuestionType.MAP_LOCATION, QuestionType.MAP_AREA],
+                type__in=[QuestionType.MAP_AREA],
                 place_id__in=scope,
             ).select_related("map", "place")
         )
 
-    base = Question.objects.filter(map__in=maps, type__in=types)
+    # Las preguntas de lugar usan un único tipo (map_area / "Lugares"): se
+    # excluye map_location para no duplicar el mismo lugar en el quiz.
+    base = Question.objects.filter(map__in=maps, type__in=types).exclude(
+        type=QuestionType.MAP_LOCATION
+    )
 
     def lineup_ok(lineup_ids) -> Q:
         """Preguntas de lineups desbloqueados; las de utilidad además exigen la
