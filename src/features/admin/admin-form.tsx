@@ -226,7 +226,16 @@ export function AdminForm({
 
   // Lugares ya cargados del mapa seleccionado (se marcan como referencia).
   const [placesByMap, setPlacesByMap] = useState<
-    Record<string, Array<{ id: number; name: string; x: number | null; y: number | null }>>
+    Record<
+      string,
+      Array<{
+        id: number;
+        name: string;
+        x: number | null;
+        y: number | null;
+        radius: number | null;
+      }>
+    >
   >({});
 
   useEffect(() => {
@@ -274,6 +283,8 @@ export function AdminForm({
           name: String(record.name ?? ""),
           x: record.position_x != null ? Number(record.position_x) : null,
           y: record.position_y != null ? Number(record.position_y) : null,
+          radius:
+            record.hit_radius != null ? Number(record.hit_radius) : null,
         }));
         setPlacesByMap((prev) => ({ ...prev, [positionMapId]: items }));
       })
@@ -694,6 +705,11 @@ if (field.type === "options-editor") {
           const x = pos.x ?? "";
           const y = pos.y ?? "";
           const hasPosition = x !== "" && y !== "";
+          const currentRadius =
+            values.hit_radius != null && values.hit_radius !== ""
+              ? Number(values.hit_radius)
+              : null;
+          const radiusValue = currentRadius ?? 12;
 
           const mapEntry = positionMapId ? mapImageData[positionMapId] : undefined;
           const relationField = resource.fields.find(
@@ -785,6 +801,18 @@ if (field.type === "options-editor") {
                     />
                     {hasPosition ? (
                       <div
+                        className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-destructive/60 bg-destructive/15"
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`,
+                          width: `${radiusValue * 2}%`,
+                          height: `${radiusValue * 2}%`,
+                        }}
+                        aria-hidden
+                      />
+                    ) : null}
+                    {hasPosition ? (
+                      <div
                         className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background bg-destructive shadow-md ring-1 ring-destructive/50"
                         style={{ left: `${x}%`, top: `${y}%` }}
                       />
@@ -796,16 +824,30 @@ if (field.type === "options-editor") {
                           place.y != null &&
                           String(place.id) !== recordId,
                       )
-                      .map((place, index) => (
-                        <div
-                          key={place.id}
-                          title={place.name}
-                          className="pointer-events-none absolute z-10 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-[9px] font-semibold text-foreground shadow-sm ring-1 ring-foreground/40"
-                          style={{ left: `${place.x}%`, top: `${place.y}%` }}
-                        >
-                          {index + 1}
-                        </div>
-                      ))}
+                      .map((place, index) => {
+                        const otherRadius = place.radius ?? 12;
+                        return (
+                          <div key={place.id}>
+                            <div
+                              className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/50 bg-primary/15"
+                              style={{
+                                left: `${place.x}%`,
+                                top: `${place.y}%`,
+                                width: `${otherRadius * 2}%`,
+                                height: `${otherRadius * 2}%`,
+                              }}
+                              aria-hidden
+                            />
+                            <div
+                              title={place.name}
+                              className="pointer-events-none absolute z-10 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 text-[9px] font-semibold text-foreground shadow-sm ring-1 ring-foreground/40"
+                              style={{ left: `${place.x}%`, top: `${place.y}%` }}
+                            >
+                              {index + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent px-2 py-1 text-xs font-medium text-foreground">
                       {hasPosition
                         ? `X: ${x} · Y: ${y}`
@@ -814,8 +856,9 @@ if (field.type === "options-editor") {
                   </div>
 
                   <p className="text-xs text-muted-foreground">
-                    El marcador rojo es la posición de este lugar. Los números marcan los
-                    lugares ya cargados en el mapa.
+                    El círculo rojo es la zona (radio de tolerancia) de este lugar; los
+                    círculos azules son las zonas de los otros lugares. El punto marca la
+                    posición exacta. Configurá el radio en el campo “Radio de zona (%)”.
                   </p>
 
                   <div className="flex flex-wrap items-end gap-3">
