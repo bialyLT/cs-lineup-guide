@@ -98,13 +98,16 @@ def generate_quiz(
         lineup_ids=lineup_ids,
         question_type=question_type,
     ).order_by(
-        "map__order", "place__order", "lineup__place__order", "lineup__order", "id"
+        "map__order", "place__order", "lineup__order", "lineup__place__order", "id"
     )
+    # Mezclamos ANTES de recortar a `count`: si cortáramos primero, como el
+    # queryset viene ordenado por mapa/lugar/lineup, las primeras `count`
+    # preguntas quedarían agrupadas (p.ej. todas de un mismo lineup). Así el
+    # subconjunto es una muestra uniforme y realmente al azar de todo lo elegido.
+    questions = list(questions)
+    random.shuffle(questions)
     if count is not None:
         questions = questions[:max(1, count)]
-    questions = list(questions)
-    # Orden aleatorio: cada quiz presenta las preguntas en un orden distinto.
-    random.shuffle(questions)
 
     if not questions:
         raise QuizGenerationError(
