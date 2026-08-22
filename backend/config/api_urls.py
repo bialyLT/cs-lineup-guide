@@ -2,7 +2,11 @@
 from django.http import JsonResponse
 from django.urls import include, path
 
-from apps.quiz.views import AnswerQuestionView, ReportQuestionView
+from apps.quiz.views import (
+    AnswerQuestionView,
+    QuizConfigView,
+    ReportQuestionView,
+)
 from apps.maps.views import LineupDetailView
 
 
@@ -19,6 +23,7 @@ urlpatterns = [
     path("quizzes/", include("apps.quiz.urls")),
     path("quizzes/<int:quiz_id>/questions/<int:pk>/answer/", AnswerQuestionView.as_view(), name="question_answer"),
     path("questions/<int:pk>/report/", ReportQuestionView.as_view(), name="question_report"),
+    path("quiz-config/", QuizConfigView.as_view(), name="quiz_config_root"),
     path("admin/", include("apps.adminpanel.urls")),
     path("", include("apps.progression.urls")),
 ]

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Option, Question, Quiz, QuizConfig
+from .models import Option, Question, QuestionType, Quiz, QuizConfig
 from .prompts import question_prompt
 from .services import get_quiz_config
 
