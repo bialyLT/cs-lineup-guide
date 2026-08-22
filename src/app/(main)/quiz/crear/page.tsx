@@ -144,12 +144,10 @@ export default function QuizCreatePage() {
     }
     return result;
   }, [maps, toggled]);
-  const allSelectableLineupIds = useMemo(
-    () => new Set(selectableLineups.map(({ lineup }) => lineup.id)),
-    [selectableLineups],
-  );
-  // Selección efectiva: todos los lineups por defecto hasta que el usuario toque.
-  const effectiveLineups = lineupsTouched ? selectedLineups : allSelectableLineupIds;
+  // Los lineups arrancan deseleccionados (opt-in): así "solo lugares" es el
+  // comportamiento real y no se cuelan preguntas de lineup cuando el usuario
+  // elige únicamente lugares.
+  const effectiveLineups = lineupsTouched ? selectedLineups : new Set<string>();
   const selectedLineupsList = useMemo(
     () =>
       selectableLineups.filter(({ lineup }) => effectiveLineups.has(lineup.id)),
