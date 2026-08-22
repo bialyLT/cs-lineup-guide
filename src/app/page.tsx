@@ -37,7 +37,7 @@ export default function LandingPage() {
 
       <div className="flex flex-col items-center gap-4">
         <Button asChild size="lg" className="h-14 rounded-full px-14 text-lg">
-          <Link href="/auth/login">Juga</Link>
+          <Link href="/login">Juga</Link>
         </Button>
         <p className="text-sm text-muted-foreground">
           ¿Todavía no tenés cuenta?{" "}
