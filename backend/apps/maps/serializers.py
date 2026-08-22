@@ -6,17 +6,31 @@ from .models import Lineup, Map, Place
 class PlaceSerializer(serializers.ModelSerializer):
     map = serializers.SlugRelatedField(slug_field="slug", read_only=True)
     position = serializers.SerializerMethodField()
+    hit_radius = serializers.SerializerMethodField()
     unlocked = serializers.SerializerMethodField()
     unlock_cost = serializers.SerializerMethodField()
 
     class Meta:
         model = Place
-        fields = ["id", "map", "name", "position", "unlocked", "unlock_cost"]
+        fields = [
+            "id",
+            "map",
+            "name",
+            "position",
+            "hit_radius",
+            "unlocked",
+            "unlock_cost",
+        ]
 
     def get_position(self, obj: Place):
         if obj.position_x is None or obj.position_y is None:
             return None
         return {"x": float(obj.position_x), "y": float(obj.position_y)}
+
+    def get_hit_radius(self, obj: Place):
+        if obj.hit_radius is None:
+            return None
+        return float(obj.hit_radius)
 
     def get_unlocked(self, obj: Place) -> bool:
         context = self.context.get("context", {})

@@ -16,6 +16,7 @@ interface ApiPlace {
   id: number;
   name: string;
   position?: { x: number; y: number } | null;
+  hit_radius?: number | null;
   unlocked: boolean;
   unlock_cost?: number | null;
   lineups?: ApiLineup[];
@@ -64,6 +65,7 @@ function mapApiPlace(raw: ApiPlace, mapId: string): Place {
     mapId,
     name: raw.name,
     position,
+    hitRadius: raw.hit_radius ?? null,
     unlocked: raw.unlocked,
     unlockCost: raw.unlock_cost ?? undefined,
     lineups: raw.lineups?.map((lineup) => mapApiLineup(lineup, mapId)),

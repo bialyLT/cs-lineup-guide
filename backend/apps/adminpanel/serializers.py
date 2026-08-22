@@ -86,7 +86,7 @@ class AdminPlaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ["id", "map", "map_name", "name", "order", "position_x", "position_y"]
+        fields = ["id", "map", "map_name", "name", "order", "position_x", "position_y", "hit_radius"]
         read_only_fields = ["id"]
 
 

@@ -222,6 +222,12 @@ export const adminResources: AdminResourceConfig[] = [
         positionSource: { relationField: "map", imageField: "image_url" },
         positionOutput: { x: "position_x", y: "position_y" },
       },
+      {
+        name: "hit_radius",
+        label: "Radio de zona (%)",
+        type: "number",
+        helpText: "Radio de tolerancia (0-100) para preguntas de tipo área. El toque cuenta como acierto dentro de este círculo.",
+      },
     ],
   },
   {

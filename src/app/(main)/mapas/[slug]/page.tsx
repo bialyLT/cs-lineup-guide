@@ -310,26 +310,39 @@ function MapOverview({
       />
       {markers.map((place, index) => {
         const isUnlocked = place.unlocked;
+        const radius = place.hitRadius ?? 12;
         return (
-          <button
-            key={place.id}
-            type="button"
-            onClick={() => onPlaceClick(place)}
-            aria-label={`${place.name}${isUnlocked ? " (desbloqueado)" : " (bloqueado)"}`}
-            className={cn(
-              "absolute z-10 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 text-[11px] font-bold shadow-sm outline-none transition-transform hover:scale-110",
-              isUnlocked
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-foreground/50 bg-background/80 text-muted-foreground",
-            )}
-            style={{
-              left: `${place.position.x}%`,
-              top: `${place.position.y}%`,
-            }}
-          >
-            <span className="absolute inset-1 rounded-full border border-current opacity-50" />
-            {isUnlocked ? <span className="relative">{index + 1}</span> : <Lock className="relative size-3" />}
-          </button>
+          <div key={place.id}>
+            {/* Zona de tolerancia (radio) del lugar. */}
+            <div
+              className="pointer-events-none absolute z-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/40 bg-primary/10"
+              style={{
+                left: `${place.position.x}%`,
+                top: `${place.position.y}%`,
+                width: `${radius * 2}%`,
+                height: `${radius * 2}%`,
+              }}
+              aria-hidden
+            />
+            <button
+              type="button"
+              onClick={() => onPlaceClick(place)}
+              aria-label={`${place.name}${isUnlocked ? " (desbloqueado)" : " (bloqueado)"}`}
+              className={cn(
+                "absolute z-10 flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 text-[11px] font-bold shadow-sm outline-none transition-transform hover:scale-110",
+                isUnlocked
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-foreground/50 bg-background/80 text-muted-foreground",
+              )}
+              style={{
+                left: `${place.position.x}%`,
+                top: `${place.position.y}%`,
+              }}
+            >
+              <span className="absolute inset-1 rounded-full border border-current opacity-50" />
+              {isUnlocked ? <span className="relative">{index + 1}</span> : <Lock className="relative size-3" />}
+            </button>
+          </div>
         );
       })}
     </div>

@@ -72,6 +72,8 @@ export interface Place {
   mapId: ID;
   name: string;
   position: Position;
+  /** Radio de la zona (0-100) para preguntas de tipo área; null = usa el default. */
+  hitRadius?: number | null;
   /** true si el usuario ya lo desbloqueó. */
   unlocked?: boolean;
   /** Costo en monedas para desbloquear este lugar. */
