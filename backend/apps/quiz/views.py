@@ -164,7 +164,7 @@ class AnswerQuestionView(APIView):
             )
 
         question = quiz_question.question
-        is_area = question.type == QuestionType.MAP_AREA
+        is_area = question.type in (QuestionType.MAP_AREA, QuestionType.MAP_LOCATION)
 
         # Para preguntas de zona (map_area) la respuesta es una coordenada de
         # toque; para el resto, una opción. Timeout => sin opción ni coordenada.

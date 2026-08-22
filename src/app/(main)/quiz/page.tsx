@@ -131,10 +131,12 @@ export default function QuizPage() {
   const isLast = index === total - 1;
   // Solo estos tipos se dibujan como puntos dentro de la imagen; el resto
   // (utilidad, combinación de teclas, dónde cae la utilidad) va como lista abajo.
-  const VISUAL_TYPES = ["reference", "player_position", "map_location"];
+  const VISUAL_TYPES = ["reference", "player_position"];
   const isVisual = VISUAL_TYPES.includes(question.type);
-  // Preguntas de zona: el usuario toca el mapa y se evalúa por proximidad.
-  const isArea = question.type === "map_area";
+  // Preguntas de lugar/zona: el usuario toca el mapa y se evalúa por proximidad
+  // al marcador del lugar (dentro de su hit_radius). La zona correcta se oculta
+  // hasta responder ("mapa sin nada").
+  const isArea = question.type === "map_area" || question.type === "map_location";
 
   function handleNext() {
     if (isLast) {
@@ -340,7 +342,11 @@ export default function QuizPage() {
           {isArea ? (
             <QuestionImage src={question.imageUrl} aspectRatio="aspect-[4/5]">
               <MapAreaTap
-                target={question.answerTarget}
+                target={
+                  phase === "feedback"
+                    ? result?.target ?? question.answerTarget
+                    : null
+                }
                 tap={tap}
                 interactive={phase === "answering"}
                 onTap={setTap}

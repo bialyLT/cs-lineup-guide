@@ -52,7 +52,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         return question_prompt(obj)
 
     def get_target(self, obj: Question):
-        if obj.type != QuestionType.MAP_AREA or not obj.place:
+        if obj.type not in (QuestionType.MAP_AREA, QuestionType.MAP_LOCATION) or not obj.place:
             return None
         place = obj.place
         if place.position_x is None or place.position_y is None:
