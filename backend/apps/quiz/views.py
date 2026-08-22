@@ -17,6 +17,7 @@ from .models import (
     Option,
     Question,
     QuestionReport,
+    QuestionType,
     Quiz,
     QuizAnswer,
     QuizConfig,
@@ -27,6 +28,7 @@ from .services import (
     QuizGenerationError,
     available_question_count,
     generate_quiz,
+    get_quiz_config,
 )
 
 
@@ -161,19 +163,52 @@ class AnswerQuestionView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # option_id ausente (timeout) o inválido => la pregunta cuenta como
-        # incorrecta (rompe la racha, no da XP). Si viene, debe ser de esta pregunta.
-        option_id = request.data.get("option_id")
+        question = quiz_question.question
+        is_area = question.type == QuestionType.MAP_AREA
+
+        # Para preguntas de zona (map_area) la respuesta es una coordenada de
+        # toque; para el resto, una opción. Timeout => sin opción ni coordenada.
         option = None
-        if option_id is not None:
-            option = Option.objects.filter(
-                pk=option_id, question=quiz_question.question
-            ).first()
-            if not option:
-                return Response(
-                    {"detail": "Opción inválida para esta pregunta."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        area_correct = False
+        tap = None  # (x, y) en 0-100 si el usuario tocó el mapa
+
+        if is_area:
+            pos_x = request.data.get("position_x")
+            pos_y = request.data.get("position_y")
+            place = question.place
+            if (
+                pos_x is not None
+                and pos_y is not None
+                and place
+                and place.position_x is not None
+                and place.position_y is not None
+            ):
+                try:
+                    tap_x = float(pos_x)
+                    tap_y = float(pos_y)
+                except (TypeError, ValueError):
+                    tap_x = tap_y = None
+                if tap_x is not None:
+                    radius = float(
+                        place.hit_radius
+                        if place.hit_radius is not None
+                        else get_quiz_config().default_hit_radius
+                    )
+                    dx = tap_x - float(place.position_x)
+                    dy = tap_y - float(place.position_y)
+                    area_correct = (dx * dx + dy * dy) ** 0.5 <= radius
+                    tap = (tap_x, tap_y)
+        else:
+            option_id = request.data.get("option_id")
+            if option_id is not None:
+                option = Option.objects.filter(
+                    pk=option_id, question=question
+                ).first()
+                if not option:
+                    return Response(
+                        {"detail": "Opción inválida para esta pregunta."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
         already_answered = QuizAnswer.objects.filter(
             quiz_question=quiz_question
@@ -181,13 +216,15 @@ class AnswerQuestionView(APIView):
 
         progression = get_or_create_progression(request.user)
         if not already_answered:
-            is_correct = option.is_correct if option else False
+            is_correct = area_correct if is_area else (option.is_correct if option else False)
             progression = record_answer(
                 request.user, correct=is_correct, progression=progression
             )
             QuizAnswer.objects.create(
                 quiz_question=quiz_question,
                 option=option,
+                tap_x=tap[0] if tap else None,
+                tap_y=tap[1] if tap else None,
                 is_correct=is_correct,
             )
 
@@ -208,16 +245,33 @@ class AnswerQuestionView(APIView):
             stored = QuizAnswer.objects.filter(quiz_question=quiz_question).first()
             is_correct = bool(stored.is_correct) if stored else False
         else:
-            is_correct = option.is_correct if option else False
+            is_correct = area_correct if is_area else (option.is_correct if option else False)
 
         correct_option = Option.objects.filter(
-            question=quiz_question.question, is_correct=True
+            question=question, is_correct=True
         ).first()
+
+        # Zona correcta para preguntas de tipo área (dibujar el feedback).
+        target = None
+        if is_area and question.place and question.place.position_x is not None:
+            place = question.place
+            radius = float(
+                place.hit_radius
+                if place.hit_radius is not None
+                else get_quiz_config().default_hit_radius
+            )
+            target = {
+                "x": float(place.position_x),
+                "y": float(place.position_y),
+                "radius": radius,
+            }
+
         return Response(
             {
                 "correct": is_correct,
                 "awarded": not already_answered,
                 "correct_option_id": correct_option.id if correct_option else None,
+                "target": target,
                 "xp": progression.xp,
                 "coins": progression.coins,
                 "streak": progression.streak,

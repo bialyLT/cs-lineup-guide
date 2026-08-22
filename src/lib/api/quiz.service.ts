@@ -18,6 +18,8 @@ export interface ApiQuestion {
   image_url?: string | null;
   lineup_title?: string | null;
   options: ApiOption[];
+  /** Solo preguntas de zona (map_area): posición real + radio de tolerancia. */
+  target?: { x: number; y: number; radius: number } | null;
 }
 
 export interface ApiQuiz {
@@ -46,6 +48,7 @@ export function mapApiQuestion(raw: ApiQuestion): Question {
     imageUrl: raw.image_url ?? undefined,
     lineupTitle: raw.lineup_title ?? undefined,
     options: raw.options.map(mapApiOption),
+    answerTarget: raw.target ?? null,
   };
 }
 
@@ -66,6 +69,8 @@ export interface AnswerResponse {
   awarded: boolean;
   /** Id de la opción correcta (para mostrarla al fallar). */
   correctOptionId?: string;
+  /** Zona correcta (map_area) para dibujar el feedback. */
+  target?: { x: number; y: number; radius: number } | null;
   xp: number;
   coins: number;
   streak: number;
@@ -133,29 +138,35 @@ export const quizService = {
       .then((raw) => ({ hardSecondsPerQuestion: raw.hard_seconds_per_question })),
 
   /** Envía la respuesta de una pregunta dentro de un quiz y actualiza contadores.
-   *  `optionId` en null indica timeout (se registra como incorrecta). */
+   *  `optionId` en null indica timeout (se registra como incorrecta). Para
+   *  preguntas de zona (map_area) se envía `position` en vez de `optionId`. */
   submitAnswer: (
     quizId: ID,
     questionId: ID,
     optionId: ID | null,
+    position?: { x: number; y: number } | null,
   ): Promise<AnswerResponse> =>
     apiClient
       .post<{
         correct: boolean;
         awarded: boolean;
         correct_option_id?: number | null;
+        target?: { x: number; y: number; radius: number } | null;
         xp: number;
         coins: number;
         streak: number;
         best_streak: number;
       }>(`/quizzes/${quizId}/questions/${questionId}/answer/`, {
         option_id: optionId == null ? null : Number(optionId),
+        position_x: position ? position.x : null,
+        position_y: position ? position.y : null,
       })
       .then((raw) => ({
         correct: raw.correct,
         awarded: raw.awarded,
         correctOptionId:
           raw.correct_option_id != null ? String(raw.correct_option_id) : undefined,
+        target: raw.target ?? null,
         xp: raw.xp,
         coins: raw.coins,
         streak: raw.streak,

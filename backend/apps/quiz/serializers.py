@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import Option, Question, Quiz, QuizConfig
 from .prompts import question_prompt
+from .services import get_quiz_config
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -27,6 +28,9 @@ class QuestionSerializer(serializers.ModelSerializer):
     )
     # El enunciado se deriva del tipo de pregunta (ver apps.quiz.prompts).
     prompt = serializers.SerializerMethodField()
+    # Para preguntas de zona (map_area): la posición real del lugar y el radio
+    # de tolerancia. El front dibuja la zona y evalúa el toque contra esto.
+    target = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -41,10 +45,28 @@ class QuestionSerializer(serializers.ModelSerializer):
             "image_url",
             "lineup_title",
             "options",
+            "target",
         ]
 
     def get_prompt(self, obj: Question) -> str:
         return question_prompt(obj)
+
+    def get_target(self, obj: Question):
+        if obj.type != QuestionType.MAP_AREA or not obj.place:
+            return None
+        place = obj.place
+        if place.position_x is None or place.position_y is None:
+            return None
+        radius = (
+            place.hit_radius
+            if place.hit_radius is not None
+            else get_quiz_config().default_hit_radius
+        )
+        return {
+            "x": float(place.position_x),
+            "y": float(place.position_y),
+            "radius": float(radius),
+        }
 
 
 class QuizSerializer(serializers.ModelSerializer):

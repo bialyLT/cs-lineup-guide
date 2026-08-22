@@ -13,7 +13,8 @@ export type QuestionType =
   | "landing_spot"
   | "key_combo"
   | "player_position"
-  | "map_location";
+  | "map_location"
+  | "map_area";
 
 export type UtilityType =
   | "smoke"
@@ -114,6 +115,9 @@ export interface Question {
   /** usa las últimas utilidades previstas (ej. "MOL84"). */
   keyCombo?: string;
   options: Option[];
+  /** Para preguntas de zona (map_area): posición real del lugar + radio de
+   *  tolerancia (0-100). El front dibuja la zona y evalúa el toque contra esto. */
+  answerTarget?: { x: number; y: number; radius: number } | null;
 }
 
 export interface Quiz {

@@ -18,6 +18,7 @@ import { QuizFeedback } from "@/features/quiz/components/quiz-feedback";
 import { QuizHeader } from "@/features/quiz/components/quiz-header";
 import { QuizProgress } from "@/features/quiz/components/quiz-progress";
 import { ReferencePoint } from "@/features/quiz/components/reference-point";
+import { MapAreaTap } from "@/features/quiz/components/map-area-tap";
 import { ReportQuestionModal } from "@/features/quiz/components/report-question-modal";
 
 const LETTERS = ["A", "B", "C", "D"];
@@ -47,6 +48,8 @@ export default function QuizPage() {
   const [pendingAction, setPendingAction] = useState<"restart" | "home" | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
+  // Toque del usuario (0-100) para preguntas de zona (map_area).
+  const [tap, setTap] = useState<{ x: number; y: number } | null>(null);
   const timeoutFired = useRef(false);
 
   useEffect(() => {
@@ -54,9 +57,20 @@ export default function QuizPage() {
   }, [quiz, router]);
 
   const answer = useMutation({
-    mutationFn: (vars: { questionId: string; optionId: string | null }) => {
+    mutationFn: (
+      vars: {
+        questionId: string;
+        optionId: string | null;
+        position?: { x: number; y: number } | null;
+      },
+    ) => {
       if (!quiz) throw new Error("Quiz no disponible.");
-      return quizService.submitAnswer(quiz.id, vars.questionId, vars.optionId);
+      return quizService.submitAnswer(
+        quiz.id,
+        vars.questionId,
+        vars.optionId,
+        vars.position,
+      );
     },
     onSuccess: (resp) => {
       setResult(resp);
@@ -119,6 +133,8 @@ export default function QuizPage() {
   // (utilidad, combinación de teclas, dónde cae la utilidad) va como lista abajo.
   const VISUAL_TYPES = ["reference", "player_position", "map_location"];
   const isVisual = VISUAL_TYPES.includes(question.type);
+  // Preguntas de zona: el usuario toca el mapa y se evalúa por proximidad.
+  const isArea = question.type === "map_area";
 
   function handleNext() {
     if (isLast) {
@@ -130,6 +146,7 @@ export default function QuizPage() {
     setIndex(next);
     quizSession.saveIndex(next);
     setSelectedId(null);
+    setTap(null);
     setResult(null);
     setPhase("answering");
   }
@@ -150,6 +167,7 @@ export default function QuizPage() {
     } else if (action === "restart") {
       setIndex(0);
       setSelectedId(null);
+      setTap(null);
       setResult(null);
       setCorrectCount(0);
       setEarnedXp(0);
@@ -163,7 +181,11 @@ export default function QuizPage() {
   function handleTimeout() {
     if (!quiz) return;
     if (answer.isPending) return;
-    answer.mutate({ questionId: question.id, optionId: null });
+    answer.mutate({
+      questionId: question.id,
+      optionId: null,
+      position: isArea ? null : undefined,
+    });
   }
 
   // Durante el feedback se destaca la opción correcta aunque el usuario haya fallado.
@@ -300,7 +322,11 @@ export default function QuizPage() {
                     : "¡Correcto!"
                   : "Incorrecto"
               }
-              correctAnswer={correctAnswerText}
+              correctAnswer={
+                isArea && !result.correct
+                  ? "La zona correcta está marcada en el mapa."
+                  : correctAnswerText
+              }
               streak={result.streak}
             />
           ) : null}
@@ -311,7 +337,23 @@ export default function QuizPage() {
             </p>
           ) : null}
 
-          {isVisual ? (
+          {isArea ? (
+            <QuestionImage src={question.imageUrl} aspectRatio="aspect-[4/5]">
+              <MapAreaTap
+                target={question.answerTarget}
+                tap={tap}
+                interactive={phase === "answering"}
+                onTap={setTap}
+                state={
+                  phase === "feedback" && result
+                    ? result.correct
+                      ? "correct"
+                      : "incorrect"
+                    : "idle"
+                }
+              />
+            </QuestionImage>
+          ) : isVisual ? (
             <QuestionImage src={question.imageUrl} aspectRatio="aspect-[4/5]">
               {question.options.map((option, i) => {
                 if (!option.position) return null;
@@ -352,10 +394,20 @@ export default function QuizPage() {
               <Button
                 size="lg"
                 className="flex-1"
-                disabled={!selectedId || answer.isPending}
+                disabled={
+                  (isArea ? !tap : !selectedId) || answer.isPending
+                }
                 onClick={() => {
                   setError("");
-                  if (selectedId) {
+                  if (isArea) {
+                    if (tap) {
+                      answer.mutate({
+                        questionId: question.id,
+                        optionId: null,
+                        position: tap,
+                      });
+                    }
+                  } else if (selectedId) {
                     answer.mutate({ questionId: question.id, optionId: selectedId });
                   }
                 }}

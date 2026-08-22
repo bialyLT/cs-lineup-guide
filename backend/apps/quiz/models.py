@@ -9,6 +9,7 @@ class QuestionType(models.TextChoices):
     KEY_COMBO = "key_combo", "Combinación de teclas"
     PLAYER_POSITION = "player_position", "Posición del jugador"
     MAP_LOCATION = "map_location", "Lugares del mapa"
+    MAP_AREA = "map_area", "Zonas del mapa"
 
 
 class Question(models.Model):
@@ -145,6 +146,13 @@ class QuizAnswer(models.Model):
     option = models.ForeignKey(
         Option, on_delete=models.CASCADE, related_name="+", null=True, blank=True
     )
+    # Para preguntas de zona (map_area): dónde tocó el usuario (0-100).
+    tap_x = models.DecimalField(
+        "toque X", max_digits=5, decimal_places=2, null=True, blank=True
+    )
+    tap_y = models.DecimalField(
+        "toque Y", max_digits=5, decimal_places=2, null=True, blank=True
+    )
     is_correct = models.BooleanField("correcta", default=False)
     answered_at = models.DateTimeField("respondida", auto_now_add=True)
 
@@ -157,10 +165,20 @@ class QuizAnswer(models.Model):
 
 
 class QuizConfig(models.Model):
-    """Configuración global del quiz. Hoy: tiempo por pregunta en dificultad difícil."""
+    """Configuración global del quiz. Hoy: tiempo por pregunta en dificultad
+    difícil y radio de tolerancia por defecto para preguntas de zona."""
 
     hard_seconds_per_question = models.PositiveIntegerField(
         "segundos por pregunta (difícil)", default=20
+    )
+    # Radio (en unidades 0-100 sobre la imagen) dentro del cual un toque cuenta
+    # como acierto en preguntas de zona (map_area) cuando el lugar no define uno.
+    default_hit_radius = models.DecimalField(
+        "radio de zona por defecto",
+        max_digits=5,
+        decimal_places=2,
+        default=12,
+        help_text="En unidades 0-100 sobre la imagen. Se usa si el lugar no tiene radio propio.",
     )
 
     class Meta:

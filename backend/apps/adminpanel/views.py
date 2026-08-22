@@ -29,7 +29,7 @@ from apps.quiz.models import (
     Quiz,
     QuizQuestion,
 )
-from apps.quiz.services import sync_map_location_questions
+from apps.quiz.services import sync_map_area_questions, sync_map_location_questions
 
 from .mixins import AuditLogMixin
 from .models import AdminAuditLog
@@ -93,15 +93,18 @@ class PlaceViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         sync_map_location_questions(instance.map)
+        sync_map_area_questions(instance.map)
 
     def perform_update(self, serializer):
         instance = serializer.save()
         sync_map_location_questions(instance.map)
+        sync_map_area_questions(instance.map)
 
     def perform_destroy(self, instance):
         map_ = instance.map
         instance.delete()
         sync_map_location_questions(map_)
+        sync_map_area_questions(map_)
 
 
 class LineupViewSet(AuditLogViewSetMixin, viewsets.ModelViewSet):

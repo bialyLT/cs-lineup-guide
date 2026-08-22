@@ -380,7 +380,7 @@ def available_questions(
         return (
             Question.objects.filter(
                 map__in=maps,
-                type=QuestionType.MAP_LOCATION,
+                type__in=[QuestionType.MAP_LOCATION, QuestionType.MAP_AREA],
                 place_id__in=scope,
             ).select_related("map", "place")
         )

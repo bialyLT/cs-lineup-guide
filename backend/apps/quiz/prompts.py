@@ -9,6 +9,7 @@ guardado en cada pregunta.
 QUESTION_TYPE_PROMPTS = {
     "reference": "¿Cuál es la referencia exacta de este lineup?",
     "map_location": "Marcá en el mapa dónde está {place}.",
+    "map_area": "¿Dónde está {place}? Tocá la zona del mapa.",
     "key_combo": "¿Cuál es la combinación de teclas para lanzar este lineup?",
     "utility": "¿Qué utilidad se lanza en este lineup?",
     "landing_spot": "¿Hacia dónde se lanza esta utilidad?",
@@ -16,6 +17,8 @@ QUESTION_TYPE_PROMPTS = {
         "¿En qué posición el jugador tiene que ubicarse para lanzar esta utilidad?"
     ),
 }
+
+MAP_AREA_HELPER = "Tocá sobre el mapa la zona donde está el lugar."
 
 
 def question_prompt(question) -> str:

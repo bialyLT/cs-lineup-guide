@@ -25,6 +25,7 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
   key_combo: "Teclas",
   player_position: "Jugador",
   map_location: "Lugares",
+  map_area: "Zonas",
 };
 
 const UTIL_SHORT_LABELS: Record<string, string> = {

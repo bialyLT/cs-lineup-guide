@@ -43,6 +43,12 @@ class Place(models.Model):
     position_y = models.DecimalField(
         "posición Y", max_digits=5, decimal_places=2, null=True, blank=True
     )
+    # Radio de tolerancia (0-100) para preguntas de zona (map_area): un toque
+    # dentro de este radio del marcador cuenta como acierto. Si es nulo se usa
+    # el radio por defecto de QuizConfig.
+    hit_radius = models.DecimalField(
+        "radio de zona", max_digits=5, decimal_places=2, null=True, blank=True
+    )
 
     class Meta:
         ordering = ["order", "name"]

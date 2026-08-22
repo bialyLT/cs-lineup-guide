@@ -73,6 +73,49 @@ def sync_map_location_questions(map_: Map) -> None:
         )
 
 
+MAP_AREA_PROMPT_PREFIX = "¿Dónde está"
+MAP_AREA_HELPER = "Tocá sobre el mapa la zona donde está el lugar."
+
+
+def sync_map_area_questions(map_: Map) -> None:
+    """Garantiza la pregunta de zona (map_area) de cada lugar del mapa.
+
+    A diferencia de ``map_location`` (elegir el punto entre candidatos), en
+    ``map_area`` el usuario toca libremente el mapa y se evalúa por proximidad
+    al marcador del lugar (dentro de su ``hit_radius``). No tiene opciones:
+    la respuesta es una coordenada.
+    """
+    places = list(
+        map_.places.filter(
+            position_x__isnull=False, position_y__isnull=False
+        ).order_by("order")
+    )
+    if len(places) < 2 or not map_.image_url:
+        return
+
+    for place in places:
+        prompt = f"{MAP_AREA_PROMPT_PREFIX} {place.name}?"
+        question, _ = Question.objects.get_or_create(
+            map=map_,
+            type=QuestionType.MAP_AREA,
+            place=place,
+            defaults={
+                "prompt": prompt,
+                "helper_text": MAP_AREA_HELPER,
+                "image_url": map_.image_url,
+            },
+        )
+        changed = False
+        if question.prompt != prompt:
+            question.prompt = prompt
+            changed = True
+        if question.image_url != map_.image_url:
+            question.image_url = map_.image_url
+            changed = True
+        if changed:
+            question.save(update_fields=["prompt", "image_url"])
+
+
 class QuizGenerationError(Exception):
     code = "quiz_generation_error"
 
